@@ -214,7 +214,7 @@ function Login() {
             required
             fullWidth
             id="username"
-            label="Username"
+            label="Addmission Number"
             name="username"
             autoComplete="username"
             autoFocus
