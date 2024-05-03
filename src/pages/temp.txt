@@ -1,0 +1,388 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Typography, Button, Box } from "@mui/material";
+// import CloseIcon from "@mui/icons-material/Close";
+
+// import LogoutIcon from "@mui/icons-material/Logout";
+
+// import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
+// import { useTheme } from "@mui/material";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ResponsiveNavBar from "../components/Navbar";
+import UserDialog from "../pages/UserDialog";
+import AttendanceTable from "../pages/AttendanceTable";
+
+function Dashboard() {
+  const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
+  //   const theme = useTheme();
+  //   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [data, setData] = useState([]);
+
+  const [open, setOpen] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
+  const navigate = useNavigate();
+  // Simulated API URL (replace with your actual API URL)
+  const apiUrl =
+    "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: new Headers({
+            Authorization: `Bearer ${token}`,
+          }),
+        });
+        const json = await response.json();
+        setData(json.response.data); // Adjust according to actual API response structure
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        navigate("/login"); // Redirect to login on failure
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  //   const handleLogout = () => {
+  //     sessionStorage.removeItem("token");
+
+  //     sessionStorage.removeItem("userDetails");
+  //     navigate("/login");
+  //   };
+  const handleUserIconClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const toggleAttendanceTable = () => {
+    setShowAttendance(!showAttendance);
+  };
+
+  //   const data1 = userDetails.courses || []; // Adjust based on actual data structure
+
+  return (
+    <div>
+      <ResponsiveNavBar pro={handleUserIconClick} />
+      <Container component="main" maxWidth="100%">
+        <Box
+          sx={{
+            mt: 4,
+            mb: 2,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* <Tooltip title="User Profile">
+            <IconButton color="inherit" onClick={handleUserIconClick}>
+              <AccountCircleIcon />
+            </IconButton>
+          </Tooltip> */}
+
+          <Button
+            startIcon={<VisibilityIcon />}
+            onClick={toggleAttendanceTable}
+            variant="contained"
+            color="primary"
+          >
+            {showAttendance ? "Hide Attendance" : "Show Attendance"}
+          </Button>
+
+          {/* <Tooltip title="Logout">
+            <Button
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+              variant="contained"
+            >
+              Logout
+            </Button>
+          </Tooltip> */}
+        </Box>
+
+        <Typography variant="h4" gutterBottom component="div">
+          Dashboard
+        </Typography>
+
+        {/* {showAttendance && (
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="attendance table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Course Name</TableCell>
+                  <TableCell align="right">Faculty Name</TableCell>
+                  <TableCell align="right">Present</TableCell>
+                  <TableCell align="right">Absent</TableCell>
+                  <TableCell align="right">Leave</TableCell>
+                  <TableCell align="right">Exempt</TableCell>
+                  <TableCell align="right">Total</TableCell>
+                  <TableCell align="right">Percent</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell component="th" scope="row">
+                      {item.cdata.course_name}
+                    </TableCell>
+                    <TableCell align="right">{item.faculty_name}</TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Present}
+                    </TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Absent}
+                    </TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Leave}
+                    </TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Exempt}
+                    </TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Total}
+                    </TableCell>
+                    <TableCell align="right">
+                      {item.attendance_summary.Percent}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )} */}
+
+        {/* <Dialog
+          open={open}
+          onClose={handleClose}
+          fullWidth
+          maxWidth="sm"
+          fullScreen={fullScreen}
+        >
+          <DialogTitle
+            sx={{
+              bgcolor: "#1976d2",
+              color: "white",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            User Details
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={{ color: "white" }}
+            >
+              <CloseIcon />
+            </IconButton>
+
+
+          </DialogTitle>
+          <DialogContent>
+            <Paper elevation={3} sx={{ p: 2, bgcolor: "#f3f6f9" }}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                component="div"
+                sx={{ color: "#1976d2" }}
+              >
+                Personal Details
+              </Typography>
+              <Typography variant="body1">
+                Name: {userDetails.response.name || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Email: {userDetails.response.email || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Mobile: {userDetails.response.mobile || "N/A"}
+              </Typography>
+
+              <Divider light sx={{ my: 2 }} />
+
+              <Typography
+                variant="h6"
+                gutterBottom
+                component="div"
+                sx={{ color: "#1976d2" }}
+              >
+                Academic Information
+              </Typography>
+              <Typography variant="body1">
+                Admission Number: {userDetails.response.username || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Roll Number: {userDetails.response.string4 || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Section: {userDetails.response.string5 || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Passout Year (if Not Back): {userDetails.response.int6 || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Semester: {userDetails.response.int4 || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Year: {userDetails.response.int3 || "N/A"}
+              </Typography>
+
+              <Divider light sx={{ my: 2 }} />
+
+              <Typography
+                variant="h6"
+                gutterBottom
+                component="div"
+                sx={{ color: "#1976d2" }}
+              >
+                Security Details
+              </Typography>
+              <Typography variant="body1">
+                Quiz Password: {userDetails.response.string10 || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Last Login Time: {userDetails.response.last_login_time || "N/A"}
+              </Typography>
+              <Typography variant="body1">
+                Role: {userDetails.response.role || "N/A"}
+              </Typography>
+            </Paper>
+          </DialogContent>
+        </Dialog>
+ */}
+
+        <UserDialog
+          open={open}
+          handleClose={handleClose}
+          userDetails={userDetails}
+        />
+        {showAttendance && <AttendanceTable data={data} />}
+      </Container>
+    </div>
+  );
+}
+
+export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+
+SDFSDFSDGSDFGSFDGGGFGDSFSDFSDFGDSFGDSFGSDFGDSFGSDFGDSFGDSFGSDFGSDFGDSFGFDGSDFGDSFGDFGDFSGDFGDFGDSFGDSFG
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Typography, Button, Box } from "@mui/material";
+// import TimeTable from "../components/TimeTable";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ResponsiveNavBar from "../components/Navbar";
+import UserDialog from "../pages/UserDialog";
+import AttendanceTable from "../pages/AttendanceTable";
+import TimeTable from "../components/TimeTable";
+import AttendancePieChart from "../components/AttendancePieChart";
+
+function Dashboard() {
+  const [showTimeTable, setShowTimeTable] = useState(true);
+  const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
+
+  const [data, setData] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(true);
+  const navigate = useNavigate();
+  const apiUrl =
+    "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch(apiUrl, {
+          headers: new Headers({
+            Authorization: `Bearer ${token}`,
+          }),
+        });
+        const json = await response.json();
+        setData(json.response.data); // Adjust according to actual API response structure
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        navigate("/login"); // Redirect to login on failure
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
+
+  const handleUserIconClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const toggleAttendanceTable = () => {
+    setShowAttendance(!showAttendance);
+  };
+  const toggleTimeTable = () => {
+    setShowTimeTable(!showTimeTable);
+  };
+
+  return (
+    <div>
+      <ResponsiveNavBar pro={handleUserIconClick} />
+      <Container component="main" maxWidth="100%">
+        <Box
+          sx={{
+            mt: 4,
+            mb: 2,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            startIcon={<VisibilityIcon />}
+            onClick={toggleAttendanceTable}
+            variant="contained"
+            color="primary"
+          >
+            {showAttendance ? "Hide Attendance" : "Show Attendance"}
+          </Button>
+        </Box>
+
+        <UserDialog
+          open={open}
+          handleClose={handleClose}
+          userDetails={userDetails}
+        />
+        <div style={{ display: "grid", padding: 10 }}>
+          <div style={{ minWidth: "90%" }}>{TimeTable && <TimeTable />}</div>
+          <div style={{ minWidth: "100%" }}>
+            {showAttendance && <AttendanceTable data={data} />}
+          </div>
+        </div>
+      </Container>
+    </div>
+  );
+}
+
+export default Dashboard;
