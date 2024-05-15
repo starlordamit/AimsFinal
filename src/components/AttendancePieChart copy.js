@@ -1,7 +1,8 @@
 import React from "react";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+// import { PieChart } from "@mui/x-charts/PieChart";
 
 import {
   Grid,
@@ -21,7 +22,12 @@ function AttendancePieChart() {
 
   const aa = sessionStorage.getItem("data");
   const xx = JSON.parse(aa);
+  //   console.log("-----------------");
+  //   console.log(xx.length);
   const new1 = xx[xx.length - 1].attendance_summary;
+
+  console.log(new1.Total);
+  console.log(new1.Present);
 
   function calc75(present, total) {
     const temp1 = present;
@@ -31,9 +37,9 @@ function AttendancePieChart() {
       present++;
       temp = (present / total) * 100;
     }
+
     return present - temp1;
   }
-
   function leavefor75(present, total) {
     const temp1 = present;
     var temp = (present / total) * 100;
@@ -42,46 +48,42 @@ function AttendancePieChart() {
       present--;
       temp = (present / total) * 100;
     }
+    console.log("leavefor75", temp);
+    console.log("present", present);
+    console.log("total", total);
+
     return temp1 - present;
   }
-
   const lectureneedfor75 = calc75(new1.Present, new1.Total);
   const leactureleavefor75 = leavefor75(new1.Present, new1.Total);
 
-  const COLORS = ["#a0d468", "#ff9f89"]; // Light green for Present, Light red for Absent
+  const COLORS = ["#556BD6", "#FF6347", "#FFBB28", "#00C49F"];
   const data = [
-    { name: "Present", value: new1.Present },
-    { name: "Absent", value: new1.Total - new1.Present },
+    { name: "Present", value: new1.Present }, // Simulated values, replace with actual data from dd
+    {
+      name: "Absent",
+      value: new1.Total - new1.Present,
+    },
+    { name: "Total", value: new1.Total },
   ];
 
-  // Render customized label for the center of the pie chart
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    index,
-  }) => {
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="black"
-        textAnchor={x > cx ? "start" : "end"}
-        dominantBaseline="central"
-        fontSize={isMobile ? 12 : 14}
-      >
-        {`${data[index].name}: ${(percent * 100).toFixed(1)}%`}
-      </text>
-    );
-  };
+  //   const renderCustomTooltip = ({ active, payload }) => {
+  //     if (active && payload && payload.length) {
+  //       return (
+  //         <div
+  //           style={{
+  //             backgroundColor: "#fff",
+  //             padding: "10px",
+  //             border: "1px solid #ccc",
+  //           }}
+  //         >
+  //           <p>{`${payload[0].name}: ${payload[0].value}`}</p>
+  //           <p>{`${(payload[0].percent * 100).toFixed(0)}%`}</p>
+  //         </div>
+  //       );
+  //     }
+  //     return null;
+  //   };
 
   return (
     <div>
@@ -100,18 +102,16 @@ function AttendancePieChart() {
           <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
             <PieChart>
               <Pie
-                data={data}
+                data={data.slice(0, 2)}
                 cx="50%"
                 cy="50%"
-                innerRadius={isMobile ? 70 : 80}
-                outerRadius={isMobile ? 100 : 120}
-                labelLine={false}
-                label={renderCustomizedLabel}
+                labelLine={true}
+                label={({ name, percent }) =>
+                  `${name}: ${(percent * 100).toFixed(1)}`
+                }
+                outerRadius={isMobile ? 100 : 150}
                 fill="#8884d8"
                 dataKey="value"
-                animationBegin={0}
-                animationDuration={800}
-                animationEasing="ease-out"
               >
                 {data.map((entry, index) => (
                   <Cell
@@ -120,8 +120,22 @@ function AttendancePieChart() {
                   />
                 ))}
               </Pie>
-              <Tooltip />
             </PieChart>
+            {/* <PieChart
+              series={[
+                {
+                  data: [data.slice(0, 2)],
+                  innerRadius: 54,
+                  outerRadius: 100,
+                  paddingAngle: 2,
+                  cornerRadius: 3,
+                  startAngle: -96,
+                  endAngle: 274,
+                  cx: 152,
+                  cy: 150,
+                },
+              ]}
+            /> */}
           </ResponsiveContainer>
         </Grid>
       </Grid>
@@ -139,22 +153,34 @@ function AttendancePieChart() {
               </TableRow>
             </TableHead>
             <TableBody>
+              {/* {data.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell component="th" scope="row">
+                    {row.name}
+                  </TableCell>
+                  <TableCell align="right">{row.value}</TableCell>
+                  <TableCell align="right"> {row.value}</TableCell>
+                </TableRow>
+              ))} */}
               <TableRow>
                 <TableCell>Present</TableCell>
                 <TableCell align="right">{new1.Present}</TableCell>
-                <TableCell align="right">{lectureneedfor75}</TableCell>
+                <TableCell align="right"> {lectureneedfor75}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Absent</TableCell>
                 <TableCell align="right">{new1.Total - new1.Present}</TableCell>
-                <TableCell align="right">{leactureleavefor75}</TableCell>
+                <TableCell align="right"> {leactureleavefor75}</TableCell>
+                {/* <TableCell align="right"> {new1.Total - new1.Present}</TableCell> */}
               </TableRow>
               <TableRow>
                 <TableCell>Total</TableCell>
                 <TableCell align="right">{new1.Total}</TableCell>
                 <TableCell align="right">
+                  {" "}
                   {leactureleavefor75 - lectureneedfor75}
                 </TableCell>
+                {/* <TableCell align="right"> {new1.Total}</TableCell> */}
               </TableRow>
             </TableBody>
           </Table>

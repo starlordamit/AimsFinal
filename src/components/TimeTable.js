@@ -13,7 +13,7 @@ import axios from "axios";
 import { blue } from "@mui/material/colors";
 import AccessTimeIcon from "@mui/icons-material/AccessTime"; // Icon for time
 
-function TimeTable() {
+const TimeTable = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeTableData, setTimeTableData] = useState([]);
 
@@ -39,6 +39,7 @@ function TimeTable() {
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (
         response.data &&
         response.data.response &&
@@ -57,36 +58,27 @@ function TimeTable() {
       console.error("Failed to fetch time table:", error);
     }
   };
-  //   const highlightCondition = false; // your condition logic here
 
-  // Utility function to remove HTML tags
   const stripHtml = (html) => {
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
   };
 
-  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-
   const handleWeekdayChange = (dayIndex) => {
     const today = new Date();
     const currentWeekday = today.getDay();
     const targetWeekday = dayIndex + 1;
-
     const difference = targetWeekday - currentWeekday;
     const newDate = new Date(today.setDate(today.getDate() + difference));
     setSelectedDate(newDate);
   };
+
   const isCurrentOrConsecutiveClass = (timeString) => {
     const utcCurrentTime = new Date();
-    console.log("utcCurrentTime", utcCurrentTime);
-
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    // const currentTime = new Date(utcCurrentTime.getTime() + istOffset);
     const currentTime = utcCurrentTime;
 
-    // Split the time string into blocks of "HH:MM - HH:MM"
     const timeSlots = timeString.match(/\d{2}:\d{2} - \d{2}:\d{2}/g);
-    if (!timeSlots) return false; // Return false if no valid time slots found
+    if (!timeSlots) return false;
 
     return timeSlots.some((slot) => {
       const [startTimeString, endTimeString] = slot.split(" - ");
@@ -99,16 +91,70 @@ function TimeTable() {
       const endTime = new Date(currentTime);
       endTime.setHours(endHours, endMinutes, 0, 0);
 
-      // Check if the current IST time is within the start and end times
-      console.log("currentTime", currentTime);
-      console.log("startTime", startTime);
-      console.log("endTime", endTime);
-
-      console.log("stat", currentTime >= startTime && currentTime <= endTime);
       return currentTime >= startTime && currentTime <= endTime;
     });
   };
-  //   console.log(isCurrentOrConsecutiveClass("11:00 - 14:00"));
+
+  const renderTimeTableList = () => {
+    return timeTableData
+      .filter((item) => item[`c${selectedDate.getDate()}`])
+      .sort((a, b) => {
+        const timeA = getTimeFromString(a[`c${selectedDate.getDate()}`]);
+        const timeB = getTimeFromString(b[`c${selectedDate.getDate()}`]);
+        return (timeA || "").localeCompare(timeB || "");
+      })
+      .map((item, index) => {
+        const key = item.cf_id
+          ? `${item.cf_id}-${item.course_id || index}`
+          : `fallback-${index}`;
+
+        return (
+          <ListItem
+            key={key}
+            sx={{
+              backgroundColor: isCurrentOrConsecutiveClass(
+                new DOMParser().parseFromString(
+                  item[`c${selectedDate.getDate()}`],
+                  "text/html"
+                ).body.textContent
+              )
+                ? "#FFB5A1"
+                : "transparent",
+            }}
+          >
+            <ListItemIcon>
+              <AccessTimeIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary={item.course_name.split("/")[2]}
+              secondary={
+                <>
+                  {item.faculty_name}
+                  <br />
+                  {new DOMParser()
+                    .parseFromString(
+                      item[`c${selectedDate.getDate()}`],
+                      "text/html"
+                    )
+                    .body.textContent.slice(0, 13)}
+                  {"  "}
+                  {new DOMParser()
+                    .parseFromString(
+                      item[`c${selectedDate.getDate()}`],
+                      "text/html"
+                    )
+                    .body.textContent.slice(13)}
+                </>
+              }
+              primaryTypographyProps={{ component: "div" }}
+              secondaryTypographyProps={{ component: "div" }}
+            />
+          </ListItem>
+        );
+      });
+  };
+
+  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
   return (
     <Box sx={{ maxWidth: 650, mx: "auto", mr: 1 }}>
@@ -148,84 +194,10 @@ function TimeTable() {
             {selectedDate.getDay() === index + 1 ? day.slice(0, 3) : day[0]}
           </Button>
         ))}
-        {/* <Typography
-          variant="h6"
-          gutterBottom
-          component="div"
-          textAlign="center"
-          fontSize={14}
-        >
-          Time Table for {selectedDate.toDateString()}
-        </Typography> */}
       </Paper>
-      <List sx={{ bgcolor: "background.paper" }}>
-        {timeTableData
-          .filter((item) => item[`c${selectedDate.getDate()}`])
-          .sort((a, b) => {
-            const timeA = getTimeFromString(a[`c${selectedDate.getDate()}`]);
-            const timeB = getTimeFromString(b[`c${selectedDate.getDate()}`]);
-            return (timeA || "").localeCompare(timeB || "");
-          })
-          .map((item, index) => {
-            const key = item.cf_id
-              ? `${item.cf_id}-${item.course_id || index}`
-              : `fallback-${index}`;
-            // console.log(`Rendering item with key: ${key}`);
-
-            return (
-              <ListItem
-                key={key}
-                sx={{
-                  backgroundColor: isCurrentOrConsecutiveClass(
-                    new DOMParser().parseFromString(
-                      item[`c${selectedDate.getDate()}`],
-                      "text/html"
-                    ).body.textContent
-                  )
-                    ? "#baf7a6"
-                    : "transparent",
-                  //   "&:hover": {
-                  //     backgroundColor: true ? "yellow" : "lightgrey",
-                  //   },
-                }}
-              >
-                <ListItemIcon>
-                  <path
-                    fill="currentColor"
-                    d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"
-                  />
-                  <AccessTimeIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.course_name.split("/")[2]}
-                  secondary={
-                    <>
-                      {item.faculty_name}
-                      <br />
-                      {new DOMParser()
-                        .parseFromString(
-                          item[`c${selectedDate.getDate()}`],
-                          "text/html"
-                        )
-                        .body.textContent.slice(0, 13)}
-                      {"  "}
-                      {new DOMParser()
-                        .parseFromString(
-                          item[`c${selectedDate.getDate()}`],
-                          "text/html"
-                        )
-                        .body.textContent.slice(13)}
-                    </>
-                  }
-                  primaryTypographyProps={{ component: "div" }}
-                  secondaryTypographyProps={{ component: "div" }}
-                />
-              </ListItem>
-            );
-          })}
-      </List>
+      <List sx={{ bgcolor: "background.paper" }}>{renderTimeTableList()}</List>
     </Box>
   );
-}
+};
 
 export default TimeTable;

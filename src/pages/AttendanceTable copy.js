@@ -1,4 +1,5 @@
 import React from "react";
+import { styled } from "@mui/material/styles";
 import {
   TableContainer,
   Paper,
@@ -10,40 +11,45 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { tableCellClasses } from "@mui/material/TableCell";
 import ResponsiveNavBar from "../components/Navbar";
 
-// import UserDialog from "../pages/UserDialog";
-
-// Custom Styled Components for better visual appearance
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.action.hover,
-  fontWeight: "bold",
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.dark, // Change the header color here
+    color: theme.palette.common.white,
+    cursor: "default", // Make it appear non-clickable
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+    cursor: "default", // Make body cells appear non-clickable
+  },
 }));
-// const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
   },
-  // hover effects for rows
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
+  "&:last-child td, &:last-child th": {
+    border: 0,
   },
+  cursor: "default", // Make rows non-clickable
 }));
+
+// Assuming data is imported or defined somewhere above this component
 const d = sessionStorage.getItem("data");
 const data = JSON.parse(d);
 
-function AttendanceTable({ data1 }) {
+function AttendanceTable() {
   return (
     <div>
-      {/* {ResponsiveNavBar && <ResponsiveNavBar />} */}
-      <TableContainer component={Paper} elevation={3}>
-        <Table sx={{ minWidth: 650 }} aria-label="attendance table">
+      {ResponsiveNavBar && <ResponsiveNavBar />}
+      <TableContainer component={Paper} sx={{ p: 2, mt: 7 }}>
+        <Table aria-label="customized table">
           <TableHead>
             <TableRow>
               <StyledTableCell>Course Name</StyledTableCell>
-              <StyledTableCell align="right">Faculty Name</StyledTableCell>
+              {/* <StyledTableCell align="right">Faculty Name</StyledTableCell> */}
               <StyledTableCell align="right">Present</StyledTableCell>
               <StyledTableCell align="right">Absent</StyledTableCell>
               <StyledTableCell align="right">Leave</StyledTableCell>
@@ -58,9 +64,9 @@ function AttendanceTable({ data1 }) {
                 <StyledTableCell component="th" scope="row">
                   {item.cdata.course_name}
                 </StyledTableCell>
-                <StyledTableCell align="right">
+                {/* <StyledTableCell align="right">
                   {item.faculty_name}
-                </StyledTableCell>
+                </StyledTableCell> */}
                 <StyledTableCell align="right">
                   {item.attendance_summary.Present}
                 </StyledTableCell>

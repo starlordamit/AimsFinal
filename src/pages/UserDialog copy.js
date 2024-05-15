@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+// import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,36 +12,67 @@ import {
   useTheme,
   Typography,
   Divider,
-  Snackbar,
-  Alert,
-  TextField,
-  InputAdornment,
 } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
+import { TextField } from "@mui/material";
+
 import DoneIcon from "@mui/icons-material/Done";
+// import Input from "@mui/material/Input";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/PersonOutline";
 import ClassIcon from "@mui/icons-material/Class";
 import EmailIcon from "@mui/icons-material/AlternateEmail";
 import PhoneIcon from "@mui/icons-material/Smartphone";
+// import SchoolIcon from "@mui/icons-material/ImportContacts";
 import CalendarTodayIcon from "@mui/icons-material/EventNote";
 import TimerIcon from "@mui/icons-material/Timer";
 import KeyIcon from "@mui/icons-material/Key";
 import SecurityIcon from "@mui/icons-material/Security";
+// import Class from "@mui/icons-material/Class";
 import SchoolIcon from "@mui/icons-material/School";
+import { useState } from "react";
+
+import * as React from "react";
+// import Box from "@mui/material/Box";
+// import IconButton from "@mui/material/IconButton";
+// import Input from "@mui/material/Input";
+// import FilledInput from "@mui/material/FilledInput";
+// import OutlinedInput from "@mui/material/OutlinedInput";
+// import InputLabel from "@mui/material/InputLabel";
+import InputAdornment from "@mui/material/InputAdornment";
+// import FormHelperText from "@mui/material/FormHelperText";
+// import FormControl from "@mui/material/FormControl";
+// import TextField from "@mui/material/TextField";
+// import Visibility from "@mui/icons-material/Visibility";
+// import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
 
 function UserDialog({ open, handleClose, userDetails }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+
   const [pin, setPin] = useState("");
   const [editPin, setEditPin] = useState(false);
-  const { response } = userDetails;
-  const response1 = JSON.parse(sessionStorage.getItem("userDetails"));
-  const pin1 = sessionStorage.getItem("pin");
+  //   const token = sessionStorage.getItem("token");
+  //   const [showPassword, setShowPassword] = React.useState(false);
 
+  const { response } = userDetails;
+  const uu = sessionStorage.getItem("userDetails");
+  const response1 = JSON.parse(uu);
+  //   const [values, setValues] = React.useState({
+  //     password: "",
+
+  //     showPassword: false,
+  //   });
+  const pin1 = sessionStorage.getItem("pin");
+  //   setPin(sessionStorage.getItem("pin"));
   const updatePin = async () => {
-    const token = sessionStorage.getItem("token");
+    // const url = "https://abes.platform.simplifii.com/api/v1/cards";
+    const t = sessionStorage.getItem("token");
+    const token = t;
+    // const newPin = pin;
+
     const headers = {
       Accept: "application/json, text/javascript, */*; q=0.01",
       "Accept-Encoding": "gzip, deflate, br, zstd",
@@ -63,6 +94,12 @@ function UserDialog({ open, handleClose, userDetails }) {
       "sec-ch-ua-platform": '"macOS"',
     };
 
+    // const data = {
+    //   card_unique_code: response1.unique_code,
+    //   action: "SetPin",
+    //   pin: newPin,
+    // };
+    // console.log(response.username);
     if (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999) {
       setSnackbarMessage(
         "PIN must be a four-digit number between 1000 and 9999."
@@ -100,20 +137,28 @@ function UserDialog({ open, handleClose, userDetails }) {
       setEditPin(false); // Close edit mode
     }
   };
+  //   const handleChange = (prop) => (event) => {
+  //     setValues({ ...values, [prop]: event.target.value });
+  //   };
 
+  //   const handleClickShowPassword = () => {
+  //     setValues({ ...values, showPassword: !values.showPassword });
+  //   };
+
+  //   const handleMouseDownPassword = (event) => {
+  //     event.preventDefault();
+  //   };
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const d = sessionStorage.getItem("data");
   const data = JSON.parse(d);
-
+  //   updatePin("2022b1541129", 7777);
   return (
     <Dialog
       open={open}
       onClose={handleClose}
       fullWidth
-      fullScreen={fullScreen}
       maxWidth={fullScreen ? "xs" : "sm"}
-      PaperProps={{ style: { borderRadius: fullScreen ? 0 : 15 } }}
     >
       <DialogTitle
         sx={{
@@ -184,6 +229,7 @@ function UserDialog({ open, handleClose, userDetails }) {
               secondary={response.string4 || "N/A"}
             />
           </ListItem>
+          <divider />
           <ListItem>
             <ListItemIcon>
               <KeyIcon />
@@ -204,7 +250,7 @@ function UserDialog({ open, handleClose, userDetails }) {
                         edge="end"
                         color="primary"
                       >
-                        <DoneIcon color="primary" />
+                        <DoneIcon color="#556BD6" />
                       </IconButton>
                       <IconButton
                         aria-label="cancel edit"
@@ -242,6 +288,7 @@ function UserDialog({ open, handleClose, userDetails }) {
               />
             )}
           </ListItem>
+
           <Divider />
           <ListItem divider>
             <ListItemIcon>
@@ -273,7 +320,20 @@ function UserDialog({ open, handleClose, userDetails }) {
               secondary={response.last_login_time || "N/A"}
             />
           </ListItem>
+          {/* <ListItem divider>
+              <ListItemIcon>
+                <KeyIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="PIN"
+                secondary={response.string10 || "N/A"}
+              />
+            </ListItem> */}
+
           <Divider />
+
+          <InputAdornment position="end"></InputAdornment>
+
           <ListItem>
             <ListItemIcon>
               <SecurityIcon />
@@ -282,8 +342,8 @@ function UserDialog({ open, handleClose, userDetails }) {
           </ListItem>
           <Divider />
           <ListItem>
-            <Typography variant="body2" color="textSecondary">
-              Instructions: To change PIN, click on the PIN.
+            <Typography variant="h9" sx={{ padding: theme.spacing(1, 0) }}>
+              Instructions : To Change PIN Click on the PIN
             </Typography>
           </ListItem>
         </List>

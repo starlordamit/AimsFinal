@@ -12,16 +12,14 @@ import {
   Box,
   useTheme,
   Button,
-  CssBaseline,
-  Snackbar,
-  Alert,
+} from "@mui/material";
+import {
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
   InputAdornment,
-  useMediaQuery,
 } from "@mui/material";
 import PasswordIcon from "@mui/icons-material/Password";
 import CloseIcon from "@mui/icons-material/Close";
@@ -32,20 +30,28 @@ import HomeIcon from "@mui/icons-material/Home";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import LogoutIcon from "@mui/icons-material/Logout";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import AutorenewTwoToneIcon from "@mui/icons-material/AutorenewTwoTone";
 import { useNavigate } from "react-router-dom";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import UserDialog from "../pages/UserDialog";
 import IndianClock from "./IndianClock";
 import axios from "axios";
-import UserDialog from "../pages/UserDialog";
+import { Snackbar, Alert } from "@mui/material";
+// import RefreshIcon from "@mui/icons-material/Refresh";
+import AutorenewTwoToneIcon from "@mui/icons-material/AutorenewTwoTone";
+// import { useState } from "react";
+// import { useNavigate } from "react-router-dom";
 
+// import { toast } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import axios from "axios";
 function ResponsiveNavBar() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  //   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const navigate = useNavigate();
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
@@ -75,7 +81,6 @@ function ResponsiveNavBar() {
   const togglePasswordVisibility = (field) => {
     setShowPassword({ ...showPassword, [field]: !showPassword[field] });
   };
-
   const atUrl =
     "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
   const ttUrl =
@@ -127,13 +132,16 @@ function ResponsiveNavBar() {
       });
       const json = await response.json();
       sessionStorage.setItem("data", JSON.stringify(json.response.data));
+      //   alert("ATTENDANCE DATA FETCHED");
     } catch (error) {
+      alert(error);
       console.error("Failed to fetch data:", error);
     }
   };
 
   const refreshPage = async () => {
     try {
+      // Store the entire response for user details
       await fetchAttendanceData();
       await fetchTimeTableData();
       setSnackbarMessage("Data Refreshed Successfully!");
@@ -145,6 +153,7 @@ function ResponsiveNavBar() {
       setSnackbarMessage("Data Refresh Error", error);
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
+      //   toast.error(error.response.data.msg || "Login error!");
     }
   };
 
@@ -154,9 +163,10 @@ function ResponsiveNavBar() {
 
   const handlePasswordChange = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
-      setSnackbarMessage("Passwords do not match.");
+      setSnackbarMessage("Passwords does not match.");
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
+
       return;
     }
     const headers = {
@@ -291,6 +301,13 @@ function ResponsiveNavBar() {
           </ListItemIcon>
           <ListItemText primary="Log Out" color="primary" variant="contained" />
         </ListItem>
+
+        {/* <ListItem button onClick={logout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem> */}
       </List>
     </Box>
   );
@@ -324,6 +341,16 @@ function ResponsiveNavBar() {
           >
             <AutorenewTwoToneIcon />
           </IconButton>
+
+          {/* <Button color="inherit" onClick={() => setDialogOpen(true)}>
+            Change Password
+          </Button> */}
+
+          {/* <Button
+            onClick={logout}
+            startIcon={<LogoutIcon />}
+            color="inherit"
+          ></Button> */}
         </Toolbar>
       </AppBar>
       <Drawer
@@ -340,7 +367,8 @@ function ResponsiveNavBar() {
       <Box
         component="main"
         sx={{
-          ml: { sm: `${drawerOpen ? 250 : 0}px` },
+          //   width: { sm: `calc(100% - ${false && drawerOpen ? 250 : 0}px)` },
+          ml: { sm: `${false && drawerOpen ? 250 : 0}px` },
           mt: 8,
         }}
       >
@@ -351,22 +379,13 @@ function ResponsiveNavBar() {
         handleClose={() => setUserDialogOpen(false)}
         userDetails={userDetails}
       />
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        fullScreen={isMobile}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-          }}
-        >
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>
           Change Password
           <IconButton
             aria-label="close"
             onClick={() => setDialogOpen(false)}
-            sx={{ position: "absolute", right: 8, top: 8, color: "white" }}
+            sx={{ position: "absolute", right: 8, top: 8 }}
           >
             <CloseIcon />
           </IconButton>
@@ -440,12 +459,7 @@ function ResponsiveNavBar() {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handlePasswordChange}
-            color="primary"
-            variant="contained"
-            fullWidth={isMobile}
-          >
+          <Button onClick={handlePasswordChange} color="primary">
             Change Password
           </Button>
         </DialogActions>

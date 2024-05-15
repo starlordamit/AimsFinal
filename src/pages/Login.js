@@ -1,4 +1,4 @@
-import React, { useState, ThemeProvider } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -11,27 +11,23 @@ import {
   DialogContent,
   DialogTitle,
   DialogActions,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  MDBFooter,
-  MDBContainer,
-  MDBCol,
-  MDBRow,
-  MDBIcon,
-  MDBBtn,
-} from "mdb-react-ui-kit";
-
-import { createTheme } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Link from "@mui/material/Link";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 function Login() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [admissionNumber, setAdmissionNumber] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [timeTableData, setTimeTableData] = useState([]);
   const dayOfMonth = new Date().getDate();
@@ -39,7 +35,6 @@ function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      //   toast.warn("Logging in...");
       const response = await axios.post(
         "https://abes.platform.simplifii.com/api/v1/admin/authenticate",
         {
@@ -54,8 +49,6 @@ function Login() {
 
         const apiUrl =
           "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
-        // const tturl =
-        //   "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
 
         const fetchTimeTableData = async (date) => {
           const token = sessionStorage.getItem("token");
@@ -102,7 +95,6 @@ function Login() {
             });
             const json = await response.json();
 
-            //   setData(json.response.data); // Adjust according to actual API response structure
             sessionStorage.setItem("data", JSON.stringify(json.response.data));
           } catch (error) {
             console.error("Failed to fetch data:", error);
@@ -110,8 +102,6 @@ function Login() {
           }
         };
 
-        // Store the entire response for user details
-        console.log("User details:");
         await fetchData();
         await fetchTimeTableData();
         toast.success("Login successful!");
@@ -129,6 +119,7 @@ function Login() {
       toast.error(error.response.data.msg || "Login error!");
     }
   };
+
   const handleForgotPassword = async () => {
     console.log("Admission Number for password reset:", admissionNumber);
 
@@ -162,6 +153,15 @@ function Login() {
 
     setDialogOpen(false); // Close dialog after submission
   };
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
   function Copyright(props) {
     return (
       <Typography
@@ -182,167 +182,185 @@ function Login() {
   const defaultTheme = createTheme();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-
-      <Box
-        sx={{
-          marginTop: 10,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography
-          variant="h1"
-          gutterBottom
-          component="div"
-          textAlign="center"
-          fontSize={24}
-          fontWeight={600}
-          color={"primary"}
-          fontFamily={"Sedan SC"}
-        >
-          ABES Information Management System
-        </Typography>
-        <Typography component="h1" variant="h6">
-          Sign In
-        </Typography>
-        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label="Addmission Number"
-            name="username"
-            autoComplete="username"
-            autoFocus
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-          <Button
-            onClick={() => setDialogOpen(true)}
-            sx={{ textTransform: "none" }}
-          >
-            Forgot Password?
-          </Button>
-        </Box>
-      </Box>
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        aria-labelledby="forgot-password-dialog-title"
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: "10px", // Rounded corners for a more modern look
-            boxShadow: 24, // Subtle shadow to give depth
-          },
-        }}
-      >
-        <DialogTitle
-          id="forgot-password-dialog-title"
+    <ThemeProvider theme={defaultTheme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
           sx={{
-            bgcolor: "primary.main",
-            color: "common.white",
-            textAlign: "center", // Center-align the title
-          }}
-        >
-          Forgot Password
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            padding: "16px 24px",
+            marginTop: 10,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
           <Typography
-            variant="body2"
-            color="textSecondary"
+            variant="h1"
             gutterBottom
-            sx={{
-              marginBottom: "8px",
-              textAlign: "center", // Center-align the text
-            }}
+            component="div"
+            textAlign="center"
+            fontSize={24}
+            fontWeight={600}
+            color={"primary"}
+            fontFamily={"Sedan SC"}
           >
-            Enter your admission number to reset your password.
+            ABES Information Management System
           </Typography>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="admissionNumber"
-            label="Admission Number"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={admissionNumber}
-            onChange={(e) => setAdmissionNumber(e.target.value)}
-            sx={{
-              marginBottom: "16px",
-              backgroundColor: "background.paper", // Light background for contrast
-            }}
-          />
-        </DialogContent>
-        <DialogActions
-          sx={{
-            padding: "16px 24px",
-            justifyContent: "center", // Center-align the buttons
+          <Typography component="h1" variant="h6">
+            Sign In
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleLogin}
+            noValidate
+            sx={{ mt: 1 }}
+          >
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="Admission Number"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign In
+            </Button>
+            <Button
+              onClick={() => setDialogOpen(true)}
+              sx={{ textTransform: "none" }}
+            >
+              Forgot Password?
+            </Button>
+          </Box>
+        </Box>
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          aria-labelledby="forgot-password-dialog-title"
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            sx: {
+              borderRadius: "10px",
+              boxShadow: 24,
+            },
           }}
         >
-          <Button
-            onClick={() => setDialogOpen(false)}
-            color="error"
-            variant="contained"
+          <DialogTitle
+            id="forgot-password-dialog-title"
             sx={{
-              marginRight: "8px",
+              bgcolor: "primary.main",
+              color: "common.white",
+              textAlign: "center",
             }}
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleForgotPassword}
-            color="primary"
-            variant="contained"
+            Forgot Password
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              padding: "16px 24px",
+            }}
           >
-            Reset Password
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-
-      <Copyright sx={{ mt: 8, mb: 4 }} />
-    </Container>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              gutterBottom
+              sx={{
+                marginBottom: "8px",
+                textAlign: "center",
+              }}
+            >
+              Enter your admission number to reset your password.
+            </Typography>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="admissionNumber"
+              label="Admission Number"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={admissionNumber}
+              onChange={(e) => setAdmissionNumber(e.target.value)}
+              sx={{
+                marginBottom: "16px",
+                backgroundColor: "background.paper",
+              }}
+            />
+          </DialogContent>
+          <DialogActions
+            sx={{
+              padding: "16px 24px",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              onClick={() => setDialogOpen(false)}
+              color="error"
+              variant="contained"
+              sx={{
+                marginRight: "8px",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleForgotPassword}
+              color="primary"
+              variant="contained"
+            >
+              Reset Password
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        <Copyright sx={{ mt: 8, mb: 4 }} />
+      </Container>
+    </ThemeProvider>
   );
 }
 

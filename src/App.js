@@ -15,6 +15,8 @@ import TodayLectures from "./components/TodayTimeTable";
 import { Analytics } from "@vercel/analytics/react";
 // import { useTheme } from "@mui/material/styles";
 // import { useMediaQuery } from "@mui/material";
+import QuizReviewPage from "./pages/quiz";
+import QuestionListPage from "./pages/quiz1";
 function App() {
   // const theme = useTheme();
   // const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -36,6 +38,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/a" element={<TodayLectures />} />
+        <Route path="/quiz" element={<QuizReviewPage />} />
+        <Route path="/quiz1" element={<QuestionListPage />} />
         <Route
           path="/subjects"
           element={

@@ -57,6 +57,7 @@ function TimeTable() {
       console.error("Failed to fetch time table:", error);
     }
   };
+  //   const highlightCondition = false; // your condition logic here
 
   // Utility function to remove HTML tags
   const stripHtml = (html) => {
@@ -64,7 +65,7 @@ function TimeTable() {
     return doc.body.textContent || "";
   };
 
-  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", ,];
+  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
   const handleWeekdayChange = (dayIndex) => {
     const today = new Date();
@@ -75,6 +76,39 @@ function TimeTable() {
     const newDate = new Date(today.setDate(today.getDate() + difference));
     setSelectedDate(newDate);
   };
+  const isCurrentOrConsecutiveClass = (timeString) => {
+    const utcCurrentTime = new Date();
+    console.log("utcCurrentTime", utcCurrentTime);
+
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    // const currentTime = new Date(utcCurrentTime.getTime() + istOffset);
+    const currentTime = utcCurrentTime;
+
+    // Split the time string into blocks of "HH:MM - HH:MM"
+    const timeSlots = timeString.match(/\d{2}:\d{2} - \d{2}:\d{2}/g);
+    if (!timeSlots) return false; // Return false if no valid time slots found
+
+    return timeSlots.some((slot) => {
+      const [startTimeString, endTimeString] = slot.split(" - ");
+      const [startHours, startMinutes] = startTimeString.split(":").map(Number);
+      const [endHours, endMinutes] = endTimeString.split(":").map(Number);
+
+      const startTime = new Date(currentTime);
+      startTime.setHours(startHours, startMinutes, 0, 0);
+
+      const endTime = new Date(currentTime);
+      endTime.setHours(endHours, endMinutes, 0, 0);
+
+      // Check if the current IST time is within the start and end times
+      console.log("currentTime", currentTime);
+      console.log("startTime", startTime);
+      console.log("endTime", endTime);
+
+      console.log("stat", currentTime >= startTime && currentTime <= endTime);
+      return currentTime >= startTime && currentTime <= endTime;
+    });
+  };
+  //   console.log(isCurrentOrConsecutiveClass("11:00 - 14:00"));
 
   return (
     <Box sx={{ maxWidth: 650, mx: "auto", mr: 1 }}>
@@ -83,7 +117,8 @@ function TimeTable() {
         gutterBottom
         component="div"
         textAlign="center"
-        fontSize={14}
+        fontWeight={400}
+        fontSize={24}
       >
         Time Table for {selectedDate.toDateString()}
       </Typography>
@@ -138,7 +173,22 @@ function TimeTable() {
             // console.log(`Rendering item with key: ${key}`);
 
             return (
-              <ListItem key={key}>
+              <ListItem
+                key={key}
+                sx={{
+                  backgroundColor: isCurrentOrConsecutiveClass(
+                    new DOMParser().parseFromString(
+                      item[`c${selectedDate.getDate()}`],
+                      "text/html"
+                    ).body.textContent
+                  )
+                    ? "#FFB5A1"
+                    : "transparent",
+                  //   "&:hover": {
+                  //     backgroundColor: true ? "yellow" : "lightgrey",
+                  //   },
+                }}
+              >
                 <ListItemIcon>
                   <path
                     fill="currentColor"
