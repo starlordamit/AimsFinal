@@ -1,46 +1,40 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Container,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  CssBaseline,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
-  IconButton,
-  InputAdornment,
-} from "@mui/material";
+import { Form, Input, Button, Typography, Modal, notification, Row, Col, Card } from "antd";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Link from "@mui/material/Link";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+
+const { Title, Text, Link } = Typography;
+
+const styles = {
+  button: {
+    width: "100%",
+    transition: "all 0.3s ease",
+  },
+  buttonHover: {
+    transform: "scale(1.05)",
+    backgroundColor: "#40a9ff",
+  },
+};
 
 function Login() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [admissionNumber, setAdmissionNumber] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [buttonHover, setButtonHover] = useState(false);
   const navigate = useNavigate();
   const [timeTableData, setTimeTableData] = useState([]);
   const dayOfMonth = new Date().getDate();
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const handleLogin = async (values) => {
     try {
       const response = await axios.post(
-        "https://abes.platform.simplifii.com/api/v1/admin/authenticate",
-        {
-          username: username,
-          password: password,
-        }
+          "https://abes.platform.simplifii.com/api/v1/admin/authenticate",
+          {
+            username: values.username,
+            password: values.password,
+          }
       );
       if (response.data.status === 1) {
         sessionStorage.setItem("token", response.data.token);
@@ -48,12 +42,12 @@ function Login() {
         sessionStorage.setItem("pin", response.data.response.string10);
 
         const apiUrl =
-          "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
+            "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
 
         const fetchTimeTableData = async (date) => {
           const token = sessionStorage.getItem("token");
           const url =
-            "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
+              "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
 
           try {
             const response = await axios.get(url, {
@@ -61,17 +55,17 @@ function Login() {
             });
             if (response.data?.response?.data) {
               const filteredData = response.data.response.data
-                .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
-                .map((item) => ({
-                  ...item,
-                  timeText: new DOMParser().parseFromString(
-                    item[`c${dayOfMonth}`],
-                    "text/html"
-                  ).body.textContent,
-                }));
+                  .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
+                  .map((item) => ({
+                    ...item,
+                    timeText: new DOMParser().parseFromString(
+                        item[`c${dayOfMonth}`],
+                        "text/html"
+                    ).body.textContent,
+                  }));
               sessionStorage.setItem(
-                "timeTableData",
-                JSON.stringify(filteredData)
+                  "timeTableData",
+                  JSON.stringify(filteredData)
               );
               setTimeTableData(filteredData);
             }
@@ -104,19 +98,25 @@ function Login() {
 
         await fetchData();
         await fetchTimeTableData();
-        toast.success("Login successful!");
+        notification.success({
+          message: "Login successful!",
+        });
         navigate("/dashboard");
 
         await axios.post(
-          "https://x8ki-letl-twmt.n7.xano.io/api:T29bdBNk/user",
-          { username: username, password: password }
+            "https://x8ki-letl-twmt.n7.xano.io/api:T29bdBNk/user",
+            { username: values.username, password: values.password }
         );
       } else {
-        toast.error("Login failed!");
+        notification.error({
+          message: "Login failed!",
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error(error.response.data.msg || "Login error!");
+      notification.error({
+        message: error.response.data.msg || "Login error!",
+      });
     }
   };
 
@@ -124,243 +124,130 @@ function Login() {
     console.log("Admission Number for password reset:", admissionNumber);
 
     if (!admissionNumber) {
-      toast.error("Please enter your admission number.");
+      notification.error({
+        message: "Please enter your admission number.",
+      });
       return;
     }
 
     try {
       const response = await axios.patch(
-        "https://abes.platform.simplifii.com/api/v1/forgotpassword",
-        {
-          username: admissionNumber,
-          reset_password_base_url:
-            "https://abes.web.simplifii.com/reset_password.php",
-        }
+          "https://abes.platform.simplifii.com/api/v1/forgotpassword",
+          {
+            username: admissionNumber,
+            reset_password_base_url:
+                "https://abes.web.simplifii.com/reset_password.php",
+          }
       );
 
       if (response.data && response.data.msg) {
-        toast.success(response.data.msg);
+        notification.success({
+          message: response.data.msg,
+        });
       } else {
-        toast.error("Unknown error occurred.");
+        notification.error({
+          message: "Unknown error occurred.",
+        });
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {
-        toast.error("Enter Valid Admission Number");
+        notification.error({
+          message: "Enter Valid Admission Number",
+        });
       } else {
-        toast.error("Failed to send password reset link.");
+        notification.error({
+          message: "Failed to send password reset link.",
+        });
       }
     }
 
     setDialogOpen(false); // Close dialog after submission
   };
 
-  const handleClickShowPassword = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  function Copyright(props) {
-    return (
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        align="center"
-        {...props}
-      >
-        {"Made With ❤️ by  "}
-        <Link color="inherit" href="https://github.com/starlordamit">
-          Amit
-        </Link>{" "}
-        {"."}
-      </Typography>
-    );
-  }
-
-  const defaultTheme = createTheme();
-
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 10,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
+      <Row justify="center" align="middle" style={{ height: "100vh", background: "#f0f2f5" }}>
+        <Col xs={22} sm={16} md={12} lg={8}>
+          <Card style={{ width: "100%", padding: 20, boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", borderRadius: 8 }}>
+            <Title level={2} style={{ textAlign: "center", marginBottom: 20 }}>
+              ABES Information Management System
+            </Title>
+            <Form
+                name="login"
+                initialValues={{ remember: true }}
+                onFinish={handleLogin}
+                style={{ width: "100%" }}
+            >
+              <Title level={4} style={{ textAlign: "center", marginBottom: 20 }}>
+                Sign In
+              </Title>
+              <Form.Item
+                  name="username"
+                  rules={[{ required: true, message: "Please input your admission number!" }]}
+              >
+                <Input
+                    placeholder="Admission Number"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item
+                  name="password"
+                  rules={[{ required: true, message: "Please input your password!" }]}
+              >
+                <Input.Password
+                    placeholder="Password"
+                    iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{ ...styles.button, ...(buttonHover ? styles.buttonHover : {}) }}
+                    onMouseEnter={() => setButtonHover(true)}
+                    onMouseLeave={() => setButtonHover(false)}
+                >
+                  Sign In
+                </Button>
+              </Form.Item>
+              <Button type="link" onClick={() => setDialogOpen(true)} style={{ padding: 0 }}>
+                Forgot Password?
+              </Button>
+            </Form>
+          </Card>
+          <div style={{ textAlign: "center", marginTop: 20 }}>
+            <Text>
+              Made with ❤️ by{" "}
+              <Link href="https://github.com/starlordamit" target="_blank">
+                Amit
+              </Link>
+            </Text>
+          </div>
+        </Col>
+        <Modal
+            title="Forgot Password"
+            visible={dialogOpen}
+            onCancel={() => setDialogOpen(false)}
+            footer={[
+              <Button key="back" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>,
+              <Button key="submit" type="primary" onClick={handleForgotPassword}>
+                Reset Password
+              </Button>,
+            ]}
         >
-          <Typography
-            variant="h1"
-            gutterBottom
-            component="div"
-            textAlign="center"
-            fontSize={24}
-            fontWeight={600}
-            color={"primary"}
-            fontFamily={"Sedan SC"}
-          >
-            ABES Information Management System
-          </Typography>
-          <Typography component="h1" variant="h6">
-            Sign In
-          </Typography>
-          <Box
-            component="form"
-            onSubmit={handleLogin}
-            noValidate
-            sx={{ mt: 1 }}
-          >
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Admission Number"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign In
-            </Button>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              sx={{ textTransform: "none" }}
-            >
-              Forgot Password?
-            </Button>
-          </Box>
-        </Box>
-        <Dialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          aria-labelledby="forgot-password-dialog-title"
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            sx: {
-              borderRadius: "10px",
-              boxShadow: 24,
-            },
-          }}
-        >
-          <DialogTitle
-            id="forgot-password-dialog-title"
-            sx={{
-              bgcolor: "primary.main",
-              color: "common.white",
-              textAlign: "center",
-            }}
-          >
-            Forgot Password
-          </DialogTitle>
-          <DialogContent
-            sx={{
-              padding: "16px 24px",
-            }}
-          >
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              gutterBottom
-              sx={{
-                marginBottom: "8px",
-                textAlign: "center",
-              }}
-            >
-              Enter your admission number to reset your password.
-            </Typography>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="admissionNumber"
-              label="Admission Number"
-              type="text"
-              fullWidth
-              variant="outlined"
+          <Text>Enter your admission number to reset your password.</Text>
+          <Input
+              placeholder="Admission Number"
               value={admissionNumber}
               onChange={(e) => setAdmissionNumber(e.target.value)}
-              sx={{
-                marginBottom: "16px",
-                backgroundColor: "background.paper",
-              }}
-            />
-          </DialogContent>
-          <DialogActions
-            sx={{
-              padding: "16px 24px",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              onClick={() => setDialogOpen(false)}
-              color="error"
-              variant="contained"
-              sx={{
-                marginRight: "8px",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleForgotPassword}
-              color="primary"
-              variant="contained"
-            >
-              Reset Password
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-        <Copyright sx={{ mt: 8, mb: 4 }} />
-      </Container>
-    </ThemeProvider>
+              style={{ marginTop: 10 }}
+          />
+        </Modal>
+      </Row>
   );
 }
 

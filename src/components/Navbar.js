@@ -1,72 +1,60 @@
 import React, { useState } from "react";
 import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
+  Layout,
+  Menu,
   Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  useTheme,
   Button,
-  CssBaseline,
-  Snackbar,
+  Typography,
+  Form,
+  Input,
   Alert,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  InputAdornment,
-  useMediaQuery,
-} from "@mui/material";
-import PasswordIcon from "@mui/icons-material/Password";
-import CloseIcon from "@mui/icons-material/Close";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import MenuIcon from "@mui/icons-material/Menu";
-import HomeIcon from "@mui/icons-material/Home";
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import LogoutIcon from "@mui/icons-material/Logout";
-import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
-import AutorenewTwoToneIcon from "@mui/icons-material/AutorenewTwoTone";
+  message,
+  Modal,
+} from "antd";
+import {
+  MenuOutlined,
+  HomeOutlined,
+  UserOutlined,
+  BookOutlined,
+  CalendarOutlined,
+  LogoutOutlined,
+  KeyOutlined,
+  ReloadOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import IndianClock from "./IndianClock";
 import axios from "axios";
+import IndianClock from "./IndianClock";
 import UserDialog from "../pages/UserDialog";
+
+const { Header, Content } = Layout;
+const { Text } = Typography;
 
 function ResponsiveNavBar() {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate();
   const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
-
-  const handleSnackbarClose = () => {
-    setOpenSnackbar(false);
-  };
-
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
     confirm: false,
   });
+
+  const navigate = useNavigate();
+  const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
+
+  const handleSnackbarClose = () => {
+    setOpenSnackbar(false);
+  };
 
   const handleChange = (prop) => (event) => {
     setPasswords({ ...passwords, [prop]: event.target.value });
@@ -77,9 +65,9 @@ function ResponsiveNavBar() {
   };
 
   const atUrl =
-    "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
+      "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
   const ttUrl =
-    "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
+      "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
 
   const fetchTimeTableData = async (date) => {
     const dayOfMonth = new Date().getDate();
@@ -94,14 +82,14 @@ function ResponsiveNavBar() {
       });
       if (response.data?.response?.data) {
         const filteredData = response.data.response.data
-          .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
-          .map((item) => ({
-            ...item,
-            timeText: new DOMParser().parseFromString(
-              item[`c${dayOfMonth}`],
-              "text/html"
-            ).body.textContent,
-          }));
+            .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
+            .map((item) => ({
+              ...item,
+              timeText: new DOMParser().parseFromString(
+                  item[`c${dayOfMonth}`],
+                  "text/html"
+              ).body.textContent,
+            }));
         sessionStorage.setItem("timeTableData", JSON.stringify(filteredData));
         setSnackbarMessage("TIME TABLE DATA FETCHED");
         setSnackbarSeverity("success");
@@ -150,13 +138,11 @@ function ResponsiveNavBar() {
 
   const token = sessionStorage.getItem("token");
   const username = JSON.parse(sessionStorage.getItem("userDetails")).response
-    .username;
+      .username;
 
   const handlePasswordChange = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
-      setSnackbarMessage("Passwords do not match.");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
+      message.error("Passwords do not match.");
       return;
     }
     const headers = {
@@ -173,9 +159,9 @@ function ResponsiveNavBar() {
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-site",
       "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
       "sec-ch-ua":
-        '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
+          '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
       "sec-ch-ua-mobile": "?0",
       "sec-ch-ua-platform": '"macOS"',
     };
@@ -190,21 +176,15 @@ function ResponsiveNavBar() {
     try {
       const response = await axios.patch(url, data, { headers });
       if (response.data) {
-        setSnackbarMessage("Password successfully changed!");
-        setSnackbarSeverity("success");
-        setOpenSnackbar(true);
+        message.success("Password successfully changed!");
         setDialogOpen(false);
       } else {
-        setSnackbarMessage("Failed to change password. Please try again.");
-        setSnackbarSeverity("error");
-        setOpenSnackbar(true);
+        message.error("Failed to change password. Please try again.");
       }
     } catch (error) {
-      setSnackbarMessage(
-        error.response.data.msg || "Failed to change password."
+      message.error(
+          error.response.data.msg || "Failed to change password."
       );
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
       console.error("Failed to change password:", error);
     }
   };
@@ -218,253 +198,114 @@ function ResponsiveNavBar() {
     navigate("/login");
   };
 
-  const drawer = (
-    <Box sx={{ width: 250, paddingTop: theme.spacing(7) }}>
-      <List>
-        <ListItem
-          button
-          onClick={() => {
-            navigate("/dashboard");
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemIcon>
-            <HomeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem
-          button
-          onClick={() => {
-            setUserDialogOpen(true);
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemIcon>
-            <AccountBoxIcon />
-          </ListItemIcon>
-          <ListItemText primary="Profile" secondary="Change PIN Here" />
-        </ListItem>
-        <ListItem
-          button
-          onClick={() => {
-            navigate("/subjects");
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemIcon>
-            <LocalLibraryIcon />
-          </ListItemIcon>
-          <ListItemText primary="Subjects Details" />
-        </ListItem>
-        <ListItem
-          button
-          onClick={() => {
-            navigate("/attendance");
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemIcon>
-            <DateRangeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Attendance Details" />
-        </ListItem>
-        <ListItem
-          button
-          onClick={() => {
-            setDialogOpen(true);
-            setDrawerOpen(false);
-          }}
-        >
-          <ListItemIcon>
-            <PasswordIcon />
-          </ListItemIcon>
-          <ListItemText
-            primary="Change Password"
-            color="primary"
-            variant="contained"
-          />
-        </ListItem>
-        <ListItem onClick={logout}>
-          <ListItemIcon>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Log Out" color="primary" variant="contained" />
-        </ListItem>
-      </List>
-    </Box>
-  );
-
   return (
-    <>
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={toggleDrawer}
-            sx={{ mr: 0, display: false ? "none" : "inline-flex" }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            AIMS 2.0
-          </Typography>
-          <IndianClock />
-          <IconButton
-            color="inherit"
-            aria-label="refresh"
-            edge="end"
-            onClick={refreshPage}
-          >
-            <AutorenewTwoToneIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="temporary"
-        open={drawerOpen}
-        onClose={toggleDrawer}
-        sx={{
-          "& .MuiDrawer-paper": { width: 250, boxSizing: "border-box" },
-          width: 250,
-        }}
-      >
-        {drawer}
-      </Drawer>
-      <Box
-        component="main"
-        sx={{
-          ml: { sm: `${drawerOpen ? 250 : 0}px` },
-          mt: 8,
-        }}
-      >
-        {/* Main content goes here */}
-      </Box>
-      <UserDialog
-        open={userDialogOpen}
-        handleClose={() => setUserDialogOpen(false)}
-        userDetails={userDetails}
-      />
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        fullScreen={isMobile}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-          }}
-        >
-          Change Password
-          <IconButton
-            aria-label="close"
-            onClick={() => setDialogOpen(false)}
-            sx={{ position: "absolute", right: 8, top: 8, color: "white" }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="Current Password"
-            type={showPassword.current ? "text" : "password"}
-            fullWidth
-            variant="outlined"
-            value={passwords.currentPassword}
-            onChange={handleChange("currentPassword")}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => togglePasswordVisibility("current")}
-                    edge="end"
-                  >
-                    {showPassword.current ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            margin="dense"
-            label="New Password"
-            type={showPassword.new ? "text" : "password"}
-            fullWidth
-            variant="outlined"
-            value={passwords.newPassword}
-            onChange={handleChange("newPassword")}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => togglePasswordVisibility("new")}
-                    edge="end"
-                  >
-                    {showPassword.new ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            margin="dense"
-            label="Confirm New Password"
-            type={showPassword.confirm ? "text" : "password"}
-            fullWidth
-            variant="outlined"
-            value={passwords.confirmPassword}
-            onChange={handleChange("confirmPassword")}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => togglePasswordVisibility("confirm")}
-                    edge="end"
-                  >
-                    {showPassword.confirm ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
+      <Layout>
+        <Header style={{ display: 'flex', alignItems: 'center', padding: '0 16px' }}>
           <Button
-            onClick={handlePasswordChange}
-            color="primary"
-            variant="contained"
-            fullWidth={isMobile}
-          >
-            Change Password
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={toggleDrawer}
+              style={{ marginRight: '16px', color: 'white' }}
+          />
+          <Typography.Title level={3} style={{ color: 'white', flex: 1, margin: 0 }}>
+            AIMS 2.0
+          </Typography.Title>
+          <IndianClock />
+          <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              onClick={refreshPage}
+              style={{ color: 'white' }}
+          />
+        </Header>
+        <Drawer
+            title="Menu"
+            placement="left"
+            onClose={toggleDrawer}
+            visible={drawerOpen}
+            bodyStyle={{ padding: 0 }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </>
+          <Menu
+              mode="inline"
+              style={{ height: '100%', borderRight: 0 }}
+              onClick={toggleDrawer}
+          >
+            <Menu.Item key="1" icon={<HomeOutlined />} onClick={() => navigate("/dashboard")}>
+              Home
+            </Menu.Item>
+            <Menu.Item key="2" icon={<UserOutlined />} onClick={() => setUserDialogOpen(true)}>
+              Profile
+            </Menu.Item>
+            <Menu.Item key="3" icon={<BookOutlined />} onClick={() => navigate("/subjects")}>
+              Subjects Details
+            </Menu.Item>
+            <Menu.Item key="4" icon={<CalendarOutlined />} onClick={() => navigate("/attendance")}>
+              Attendance Details
+            </Menu.Item>
+            <Menu.Item key="5" icon={<KeyOutlined />} onClick={() => setDialogOpen(true)}>
+              Change Password
+            </Menu.Item>
+            <Menu.Item key="6" icon={<LogoutOutlined />} onClick={logout}>
+              Log Out
+            </Menu.Item>
+          </Menu>
+        </Drawer>
+        {/*<Content style={{ padding: '24px', marginTop: '64px' }}>*/}
+        {/*  /!* Main content goes here *!/*/}
+        {/*</Content>*/}
+        <UserDialog
+            open={userDialogOpen}
+            handleClose={() => setUserDialogOpen(false)}
+            userDetails={userDetails}
+        />
+        <Modal
+            title="Change Password"
+            visible={dialogOpen}
+            onCancel={() => setDialogOpen(false)}
+            footer={[
+              <Button key="back" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>,
+              <Button key="submit" type="primary" onClick={handlePasswordChange}>
+                Change Password
+              </Button>,
+            ]}
+        >
+          <Form layout="vertical">
+            <Form.Item label="Current Password">
+              <Input.Password
+                  value={passwords.currentPassword}
+                  onChange={handleChange("currentPassword")}
+                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+              />
+            </Form.Item>
+            <Form.Item label="New Password">
+              <Input.Password
+                  value={passwords.newPassword}
+                  onChange={handleChange("newPassword")}
+                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+              />
+            </Form.Item>
+            <Form.Item label="Confirm New Password">
+              <Input.Password
+                  value={passwords.confirmPassword}
+                  onChange={handleChange("confirmPassword")}
+                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+        {openSnackbar && (
+            <Alert
+                message={snackbarMessage}
+                type={snackbarSeverity}
+                showIcon
+                closable
+                afterClose={handleSnackbarClose}
+                style={{ position: 'fixed', bottom: 16, right: 16 }}
+            />
+        )}
+      </Layout>
   );
 }
 

@@ -1,309 +1,202 @@
 import React, { useState } from "react";
+import { Modal, Button, Typography, notification, Input, Row, Col, Divider, Card, Space, Avatar } from "antd";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  useMediaQuery,
-  useTheme,
-  Typography,
-  Divider,
-  Snackbar,
-  Alert,
-  TextField,
-  InputAdornment,
-} from "@mui/material";
-import DoneIcon from "@mui/icons-material/Done";
-import CloseIcon from "@mui/icons-material/Close";
-import PersonIcon from "@mui/icons-material/PersonOutline";
-import ClassIcon from "@mui/icons-material/Class";
-import EmailIcon from "@mui/icons-material/AlternateEmail";
-import PhoneIcon from "@mui/icons-material/Smartphone";
-import CalendarTodayIcon from "@mui/icons-material/EventNote";
-import TimerIcon from "@mui/icons-material/Timer";
-import KeyIcon from "@mui/icons-material/Key";
-import SecurityIcon from "@mui/icons-material/Security";
-import SchoolIcon from "@mui/icons-material/School";
+    UserOutlined,
+    MailOutlined,
+    PhoneOutlined,
+    IdcardOutlined,
+    KeyOutlined,
+    LockOutlined,
+    CalendarOutlined,
+    FieldTimeOutlined,
+    SafetyOutlined,
+    CheckOutlined,
+    CloseOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
+import { useMediaQuery } from "react-responsive";
+
+const { Text, Title } = Typography;
 
 function UserDialog({ open, handleClose, userDetails }) {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
-  const [pin, setPin] = useState("");
-  const [editPin, setEditPin] = useState(false);
-  const { response } = userDetails;
-  const response1 = JSON.parse(sessionStorage.getItem("userDetails"));
-  const pin1 = sessionStorage.getItem("pin");
+    const [pin, setPin] = useState("");
+    const [editPin, setEditPin] = useState(false);
+    const { response } = userDetails;
+    const response1 = JSON.parse(sessionStorage.getItem("userDetails"));
+    const pin1 = sessionStorage.getItem("pin");
 
-  const updatePin = async () => {
-    const token = sessionStorage.getItem("token");
-    const headers = {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      "Accept-Encoding": "gzip, deflate, br, zstd",
-      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-      Authorization: `Bearer ${token}`,
-      Connection: "keep-alive",
-      "Content-Type": "application/json",
-      Host: "abes.platform.simplifii.com",
-      Origin: "https://abes.web.simplifii.com",
-      Referer: "https://abes.web.simplifii.com/",
-      "Sec-Fetch-Dest": "empty",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "same-site",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-      "sec-ch-ua":
-        '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"macOS"',
+    const updatePin = async () => {
+        const token = sessionStorage.getItem("token");
+
+        if (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999) {
+            notification.error({
+                message: "PIN must be a four-digit number between 1000 and 9999.",
+            });
+            return;
+        }
+
+        try {
+            const response = await axios.patch(
+                "https://abes.platform.simplifii.com/api/v1/cards",
+                {
+                    card_unique_code: response1.response.unique_code,
+                    action: "SetPin",
+                    pin,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data && response.data.msg) {
+                notification.success({
+                    message: response.data.msg,
+                });
+                sessionStorage.setItem("pin", pin);
+            } else {
+                notification.warning({
+                    message: "Unknown response from server.",
+                });
+            }
+        } catch (error) {
+            notification.error({
+                message: "Failed to update PIN.",
+            });
+            console.error("Error updating PIN:", error);
+        } finally {
+            setEditPin(false); // Close edit mode
+        }
     };
 
-    if (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999) {
-      setSnackbarMessage(
-        "PIN must be a four-digit number between 1000 and 9999."
-      );
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      return;
-    }
+    const d = sessionStorage.getItem("data");
+    const data = JSON.parse(d);
 
-    try {
-      const response = await axios.patch(
-        "https://abes.platform.simplifii.com/api/v1/cards",
-        {
-          card_unique_code: response1.response.unique_code,
-          action: "SetPin",
-          pin,
-        },
-        { headers }
-      );
+    const isSmallScreen = useMediaQuery({ query: '(max-width: 767px)' });
 
-      if (response.data && response.data.msg) {
-        setSnackbarMessage(response.data.msg);
-        setSnackbarSeverity("success");
-        sessionStorage.setItem("pin", pin);
-      } else {
-        setSnackbarMessage("Unknown response from server.");
-        setSnackbarSeverity("warning");
-      }
-    } catch (error) {
-      setSnackbarMessage("Failed to update PIN.");
-      setSnackbarSeverity("error");
-      console.error("Error updating PIN:", error);
-    } finally {
-      setSnackbarOpen(true);
-      setEditPin(false); // Close edit mode
-    }
-  };
-
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const d = sessionStorage.getItem("data");
-  const data = JSON.parse(d);
-
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      fullWidth
-      fullScreen={fullScreen}
-      maxWidth={fullScreen ? "xs" : "sm"}
-      PaperProps={{ style: { borderRadius: fullScreen ? 0 : 15 } }}
-    >
-      <DialogTitle
-        sx={{
-          bgcolor: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: theme.spacing(1, 2),
-        }}
-      >
-        User Details
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{ color: theme.palette.primary.contrastText }}
+    return (
+        <Modal
+            title="User Details"
+            visible={open}
+            onCancel={handleClose}
+            footer={null}
+            width={isSmallScreen ? "100%" : "600px"}
+            style={{ borderRadius: isSmallScreen ? 0 : 15 }}
+            // bodyStyle={{ padding: '1px' }}
         >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <List sx={{ padding: 0 }}>
-          <ListItem divider>
-            <ListItemIcon>
-              <PersonIcon />
-            </ListItemIcon>
-            <ListItemText primary="Name" secondary={response.name || "N/A"} />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <ClassIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Department & Section"
-              secondary={data[0].dept + " - " + data[0].section || "N/A"}
-            />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <EmailIcon />
-            </ListItemIcon>
-            <ListItemText primary="Email" secondary={response.email || "N/A"} />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <PhoneIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Mobile"
-              secondary={response.mobile || "N/A"}
-            />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <SchoolIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Admission Number"
-              secondary={response.username || "N/A"}
-            />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <SecurityIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Roll Number"
-              secondary={response.string4 || "N/A"}
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <KeyIcon />
-            </ListItemIcon>
-            {editPin ? (
-              <TextField
-                fullWidth
-                label="Edit PIN"
-                variant="outlined"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="submit new pin"
-                        onClick={updatePin}
-                        edge="end"
-                        color="primary"
-                      >
-                        <DoneIcon color="primary" />
-                      </IconButton>
-                      <IconButton
-                        aria-label="cancel edit"
-                        onClick={() => {
-                          setEditPin(false);
-                          setSnackbarOpen(false);
-                        }}
-                        edge="end"
-                        color="secondary"
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                error={
-                  pin.length > 0 &&
-                  (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999)
-                }
-                helperText={
-                  pin.length > 0 &&
-                  (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999)
-                    ? "PIN must be a four-digit number between 1000 and 9999"
-                    : ""
-                }
-              />
-            ) : (
-              <ListItemText
-                primary="PIN (Click to Edit)"
-                secondary={pin1 || "N/A"}
-                onClick={() => {
-                  setEditPin(true);
-                  setPin(pin1);
-                }}
-              />
-            )}
-          </ListItem>
-          <Divider />
-          <ListItem divider>
-            <ListItemIcon>
-              <CalendarTodayIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Term"
-              secondary={
-                "Year : " + response.int3 + " Semester : " + response.int4 ||
-                "N/A"
-              }
-            />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <CalendarTodayIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Passing Year (IFN back)"
-              secondary={response.int6 || "N/A"}
-            />
-          </ListItem>
-          <ListItem divider>
-            <ListItemIcon>
-              <TimerIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Last Login Time"
-              secondary={response.last_login_time || "N/A"}
-            />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemIcon>
-              <SecurityIcon />
-            </ListItemIcon>
-            <ListItemText primary="Role" secondary={response.role || "N/A"} />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <Typography variant="body2" color="textSecondary">
-              Instructions: To change PIN, click on the PIN.
-            </Typography>
-          </ListItem>
-        </List>
-      </DialogContent>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Dialog>
-  );
+            <Card bordered={false} style={{ marginBottom: 16 }}>
+                <Row gutter={[16, 16]} justify="center">
+                    <Col span={24} style={{ textAlign: 'center' }}>
+                        <Avatar size={64} icon={<UserOutlined />} />
+                        <Title level={4} style={{ marginTop: 8 }}>
+                            {response.name || "N/A"}
+                        </Title>
+                    </Col>
+                    <Col span={24}>
+                        <Row gutter={[16, 16]}>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><IdcardOutlined /> Department & Section:</Text>
+                                    <Text>{`${data[0].dept} - ${data[0].section}` || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><MailOutlined /> Email:</Text>
+                                    <Text>{response.email || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><PhoneOutlined /> Mobile:</Text>
+                                    <Text>{response.mobile || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><SafetyOutlined /> Admission Number:</Text>
+                                    <Text>{response.username || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><LockOutlined /> Roll Number:</Text>
+                                    <Text>{response.string4 || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><CalendarOutlined /> Term:</Text>
+                                    <Text>{`Year: ${response.int3} Semester: ${response.int4}` || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><CalendarOutlined /> Passing Year (IFN back):</Text>
+                                    <Text>{response.int6 || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><FieldTimeOutlined /> Last Login Time:</Text>
+                                    <Text>{response.last_login_time || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><SafetyOutlined /> Role:</Text>
+                                    <Text>{response.role || "N/A"}</Text>
+                                </Space>
+                            </Col>
+                            <Col span={isSmallScreen ? 24 : 12}>
+                                <Space direction="vertical" size="small">
+                                    <Text strong><KeyOutlined /> PIN:</Text>
+                                    {editPin ? (
+                                        <Input
+                                            placeholder="Edit PIN"
+                                            value={pin}
+                                            onChange={(e) => setPin(e.target.value)}
+                                            addonAfter={
+                                                <>
+                                                    <Button
+                                                        type="primary"
+                                                        icon={<CheckOutlined />}
+                                                        onClick={updatePin}
+                                                    />
+                                                    <Button
+                                                        type="danger"
+                                                        icon={<CloseOutlined />}
+                                                        onClick={() => setEditPin(false)}
+                                                    />
+                                                </>
+                                            }
+                                            status={
+                                                pin.length > 0 &&
+                                                (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999)
+                                                    ? "error"
+                                                    : ""
+                                            }
+                                            help={
+                                                pin.length > 0 &&
+                                                (!pin.match(/^\d{4}$/) || pin < 1000 || pin > 9999)
+                                                    ? "PIN must be a four-digit number between 1000 and 9999"
+                                                    : ""
+                                            }
+                                        />
+                                    ) : (
+                                        <Text onClick={() => setEditPin(true)}>
+                                            {pin1 || "N/A"}
+                                        </Text>
+                                    )}
+                                </Space>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </Card>
+            <Divider style={{ margin: '8px 0' }} />
+            <Typography.Text type="secondary" style={{ padding: '0 16px' }}>
+                Instructions: To change PIN, click on the PIN.
+            </Typography.Text>
+        </Modal>
+    );
 }
 
 export default UserDialog;
