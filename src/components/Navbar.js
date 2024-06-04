@@ -65,9 +65,9 @@ function ResponsiveNavBar() {
   };
 
   const atUrl =
-      "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
+    "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
   const ttUrl =
-      "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
+    "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
 
   const fetchTimeTableData = async (date) => {
     const dayOfMonth = new Date().getDate();
@@ -82,14 +82,14 @@ function ResponsiveNavBar() {
       });
       if (response.data?.response?.data) {
         const filteredData = response.data.response.data
-            .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
-            .map((item) => ({
-              ...item,
-              timeText: new DOMParser().parseFromString(
-                  item[`c${dayOfMonth}`],
-                  "text/html"
-              ).body.textContent,
-            }));
+          .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
+          .map((item) => ({
+            ...item,
+            timeText: new DOMParser().parseFromString(
+              item[`c${dayOfMonth}`],
+              "text/html"
+            ).body.textContent,
+          }));
         sessionStorage.setItem("timeTableData", JSON.stringify(filteredData));
         setSnackbarMessage("TIME TABLE DATA FETCHED");
         setSnackbarSeverity("success");
@@ -138,7 +138,7 @@ function ResponsiveNavBar() {
 
   const token = sessionStorage.getItem("token");
   const username = JSON.parse(sessionStorage.getItem("userDetails")).response
-      .username;
+    .username;
 
   const handlePasswordChange = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
@@ -159,9 +159,9 @@ function ResponsiveNavBar() {
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-site",
       "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
       "sec-ch-ua":
-          '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
+        '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
       "sec-ch-ua-mobile": "?0",
       "sec-ch-ua-platform": '"macOS"',
     };
@@ -182,9 +182,7 @@ function ResponsiveNavBar() {
         message.error("Failed to change password. Please try again.");
       }
     } catch (error) {
-      message.error(
-          error.response.data.msg || "Failed to change password."
-      );
+      message.error(error.response.data.msg || "Failed to change password.");
       console.error("Failed to change password:", error);
     }
   };
@@ -199,113 +197,144 @@ function ResponsiveNavBar() {
   };
 
   return (
-      <Layout>
-        <Header style={{ display: 'flex', alignItems: 'center', padding: '0 16px' }}>
-          <Button
-              type="text"
-              icon={<MenuOutlined />}
-              onClick={toggleDrawer}
-              style={{ marginRight: '16px', color: 'white' }}
-          />
-          <Typography.Title level={3} style={{ color: 'white', flex: 1, margin: 0 }}>
-            AIMS 2.0
-          </Typography.Title>
-          <IndianClock />
-          <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              onClick={refreshPage}
-              style={{ color: 'white' }}
-          />
-        </Header>
-        <Drawer
-            title="Menu"
-            placement="left"
-            onClose={toggleDrawer}
-            visible={drawerOpen}
-            bodyStyle={{ padding: 0 }}
-        >
-          <Menu
-              mode="inline"
-              style={{ height: '100%', borderRight: 0 }}
-              onClick={toggleDrawer}
-          >
-            <Menu.Item key="1" icon={<HomeOutlined />} onClick={() => navigate("/dashboard")}>
-              Home
-            </Menu.Item>
-            <Menu.Item key="2" icon={<UserOutlined />} onClick={() => setUserDialogOpen(true)}>
-              Profile
-            </Menu.Item>
-            <Menu.Item key="3" icon={<BookOutlined />} onClick={() => navigate("/subjects")}>
-              Subjects Details
-            </Menu.Item>
-            <Menu.Item key="4" icon={<CalendarOutlined />} onClick={() => navigate("/attendance")}>
-              Attendance Details
-            </Menu.Item>
-            <Menu.Item key="5" icon={<KeyOutlined />} onClick={() => setDialogOpen(true)}>
-              Change Password
-            </Menu.Item>
-            <Menu.Item key="6" icon={<LogoutOutlined />} onClick={logout}>
-              Log Out
-            </Menu.Item>
-          </Menu>
-        </Drawer>
-        {/*<Content style={{ padding: '24px', marginTop: '64px' }}>*/}
-        {/*  /!* Main content goes here *!/*/}
-        {/*</Content>*/}
-        <UserDialog
-            open={userDialogOpen}
-            handleClose={() => setUserDialogOpen(false)}
-            userDetails={userDetails}
+    <Layout>
+      <Header
+        style={{ display: "flex", alignItems: "center", padding: "0 16px" }}
+      >
+        <Button
+          type="text"
+          icon={<MenuOutlined />}
+          onClick={toggleDrawer}
+          style={{ marginRight: "16px", color: "white" }}
         />
-        <Modal
-            title="Change Password"
-            visible={dialogOpen}
-            onCancel={() => setDialogOpen(false)}
-            footer={[
-              <Button key="back" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>,
-              <Button key="submit" type="primary" onClick={handlePasswordChange}>
-                Change Password
-              </Button>,
-            ]}
+        <Typography.Title
+          level={3}
+          style={{ color: "white", flex: 1, margin: 0 }}
         >
-          <Form layout="vertical">
-            <Form.Item label="Current Password">
-              <Input.Password
-                  value={passwords.currentPassword}
-                  onChange={handleChange("currentPassword")}
-                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-              />
-            </Form.Item>
-            <Form.Item label="New Password">
-              <Input.Password
-                  value={passwords.newPassword}
-                  onChange={handleChange("newPassword")}
-                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-              />
-            </Form.Item>
-            <Form.Item label="Confirm New Password">
-              <Input.Password
-                  value={passwords.confirmPassword}
-                  onChange={handleChange("confirmPassword")}
-                  iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-        {openSnackbar && (
-            <Alert
-                message={snackbarMessage}
-                type={snackbarSeverity}
-                showIcon
-                closable
-                afterClose={handleSnackbarClose}
-                style={{ position: 'fixed', bottom: 16, right: 16 }}
+          AIMS 2.0
+        </Typography.Title>
+        <IndianClock />
+        <Button
+          type="text"
+          icon={<ReloadOutlined />}
+          onClick={refreshPage}
+          style={{ color: "white" }}
+        />
+      </Header>
+      <Drawer
+        title="Menu"
+        placement="left"
+        onClose={toggleDrawer}
+        visible={drawerOpen}
+        bodyStyle={{ padding: 0 }}
+      >
+        <Menu
+          mode="inline"
+          style={{ height: "100%", borderRight: 0 }}
+          onClick={toggleDrawer}
+        >
+          <Menu.Item
+            key="1"
+            icon={<HomeOutlined />}
+            onClick={() => navigate("/dashboard")}
+          >
+            Home
+          </Menu.Item>
+          <Menu.Item
+            key="2"
+            icon={<UserOutlined />}
+            onClick={() => setUserDialogOpen(true)}
+          >
+            Profile
+          </Menu.Item>
+          <Menu.Item
+            key="3"
+            icon={<BookOutlined />}
+            onClick={() => navigate("/subjects")}
+          >
+            Subjects Details
+          </Menu.Item>
+          <Menu.Item
+            key="4"
+            icon={<CalendarOutlined />}
+            onClick={() => navigate("/attendance")}
+          >
+            Attendance Details
+          </Menu.Item>
+          <Menu.Item
+            key="5"
+            icon={<KeyOutlined />}
+            onClick={() => setDialogOpen(true)}
+          >
+            Change Password
+          </Menu.Item>
+          <Menu.Item key="6" icon={<LogoutOutlined />} onClick={logout}>
+            Log Out
+          </Menu.Item>
+        </Menu>
+      </Drawer>
+      {/*<Content style={{ padding: '24px', marginTop: '64px' }}>*/}
+      {/*  /!* Main content goes here *!/*/}
+      {/*</Content>*/}
+      <UserDialog
+        open={userDialogOpen}
+        handleClose={() => setUserDialogOpen(false)}
+        userDetails={userDetails}
+      />
+      <Modal
+        title="Change Password"
+        visible={dialogOpen}
+        onCancel={() => setDialogOpen(false)}
+        footer={[
+          <Button key="back" onClick={() => setDialogOpen(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" onClick={handlePasswordChange}>
+            Change Password
+          </Button>,
+        ]}
+      >
+        <Form layout="vertical">
+          <Form.Item label="Current Password">
+            <Input.Password
+              value={passwords.currentPassword}
+              onChange={handleChange("currentPassword")}
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
             />
-        )}
-      </Layout>
+          </Form.Item>
+          <Form.Item label="New Password">
+            <Input.Password
+              value={passwords.newPassword}
+              onChange={handleChange("newPassword")}
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Confirm New Password">
+            <Input.Password
+              value={passwords.confirmPassword}
+              onChange={handleChange("confirmPassword")}
+              iconRender={(visible) =>
+                visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+              }
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+      {openSnackbar && (
+        <Alert
+          message={snackbarMessage}
+          type={snackbarSeverity}
+          showIcon
+          closable
+          afterClose={handleSnackbarClose}
+          style={{ position: "fixed", bottom: 16, right: 16 }}
+        />
+      )}
+    </Layout>
   );
 }
 
