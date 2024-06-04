@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Typography,
-  Button,
-  Box,
-  Paper,
-} from "@mui/material";
+import { List, Typography, Button, Layout, Card, Row, Col, Spin } from "antd";
 import axios from "axios";
-import { blue } from "@mui/material/colors";
-import AccessTimeIcon from "@mui/icons-material/AccessTime"; // Icon for time
+import { blue } from "@ant-design/colors";
+import { ClockCircleOutlined } from "@ant-design/icons";
+const { Content } = Layout;
 
 const TimeTable = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeTableData, setTimeTableData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTimeTableData(selectedDate);
@@ -30,6 +23,7 @@ const TimeTable = () => {
   };
 
   const fetchTimeTableData = async (date) => {
+    setLoading(true);
     const dayOfMonth = date.getDate();
     const token = sessionStorage.getItem("token");
     const url =
@@ -57,6 +51,7 @@ const TimeTable = () => {
     } catch (error) {
       console.error("Failed to fetch time table:", error);
     }
+    setLoading(false);
   };
 
   const stripHtml = (html) => {
@@ -96,11 +91,12 @@ const TimeTable = () => {
   };
 
   const renderTimeTableList = () => {
+    const currentDay = selectedDate.getDate();
     return timeTableData
-      .filter((item) => item[`c${selectedDate.getDate()}`])
+      .filter((item) => item[`c${currentDay}`])
       .sort((a, b) => {
-        const timeA = getTimeFromString(a[`c${selectedDate.getDate()}`]);
-        const timeB = getTimeFromString(b[`c${selectedDate.getDate()}`]);
+        const timeA = getTimeFromString(a[`c${currentDay}`]);
+        const timeB = getTimeFromString(b[`c${currentDay}`]);
         return (timeA || "").localeCompare(timeB || "");
       })
       .map((item, index) => {
@@ -108,48 +104,49 @@ const TimeTable = () => {
           ? `${item.cf_id}-${item.course_id || index}`
           : `fallback-${index}`;
 
+        const isCurrentClass = isCurrentOrConsecutiveClass(
+          new DOMParser().parseFromString(item[`c${currentDay}`], "text/html")
+            .body.textContent
+        );
+
         return (
-          <ListItem
-            key={key}
-            sx={{
-              backgroundColor: isCurrentOrConsecutiveClass(
-                new DOMParser().parseFromString(
-                  item[`c${selectedDate.getDate()}`],
-                  "text/html"
-                ).body.textContent
-              )
-                ? "#FFB5A1"
-                : "transparent",
-            }}
-          >
-            <ListItemIcon>
-              <AccessTimeIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={item.course_name.split("/")[2]}
-              secondary={
-                <>
-                  {item.faculty_name}
-                  <br />
-                  {new DOMParser()
-                    .parseFromString(
-                      item[`c${selectedDate.getDate()}`],
-                      "text/html"
-                    )
-                    .body.textContent.slice(0, 13)}
-                  {"  "}
-                  {new DOMParser()
-                    .parseFromString(
-                      item[`c${selectedDate.getDate()}`],
-                      "text/html"
-                    )
-                    .body.textContent.slice(13)}
-                </>
-              }
-              primaryTypographyProps={{ component: "div" }}
-              secondaryTypographyProps={{ component: "div" }}
-            />
-          </ListItem>
+          <List.Item key={key}>
+            <Card
+              style={{
+                backgroundColor:
+                  selectedDate.getDay() === new Date().getDay() &&
+                  isCurrentClass
+                    ? "#FFB5A1"
+                    : "transparent",
+                marginBottom: "8px",
+              }}
+              bodyStyle={{ padding: "8px" }}
+            >
+              <Card.Meta
+                avatar={<ClockCircleOutlined />}
+                title={
+                  <Typography.Text strong>
+                    {item.course_name.split("/")[2]}
+                  </Typography.Text>
+                }
+                description={
+                  <>
+                    <Typography.Text>{item.faculty_name}</Typography.Text>
+                    <br />
+                    <Typography.Text>
+                      {new DOMParser()
+                        .parseFromString(item[`c${currentDay}`], "text/html")
+                        .body.textContent.slice(0, 13)}
+                      {"  "}
+                      {new DOMParser()
+                        .parseFromString(item[`c${currentDay}`], "text/html")
+                        .body.textContent.slice(13)}
+                    </Typography.Text>
+                  </>
+                }
+              />
+            </Card>
+          </List.Item>
         );
       });
   };
@@ -157,46 +154,60 @@ const TimeTable = () => {
   const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
   return (
-    <Box sx={{ maxWidth: 650, mx: "auto", mr: 1 }}>
-      <Typography
-        variant="h1"
-        gutterBottom
-        component="div"
-        textAlign="center"
-        fontWeight={400}
-        fontSize={24}
-      >
-        Time Table for {selectedDate.toDateString()}
-      </Typography>
-      <Paper
-        elevation={5}
-        sx={{
-          mb: 1,
-          p: 0,
-          display: "inline-block",
-          alignContent: "center",
-          width: "100%",
-          textAlign: "center",
-        }}
-      >
-        {weekdays.map((day, index) => (
-          <Button
-            key={day}
-            onClick={() => handleWeekdayChange(index)}
-            sx={{
-              m: 0.5,
-              borderBottom:
-                selectedDate.getDay() === index + 1
-                  ? `2px solid ${blue[500]}`
-                  : "none",
-            }}
-          >
-            {selectedDate.getDay() === index + 1 ? day.slice(0, 3) : day[0]}
-          </Button>
-        ))}
-      </Paper>
-      <List sx={{ bgcolor: "background.paper" }}>{renderTimeTableList()}</List>
-    </Box>
+    <Layout style={{ minHeight: "100vh", position: "relative" }}>
+      <Content style={{ maxWidth: 300, margin: "auto", padding: "1rem" }}>
+        <Typography.Title
+          level={2}
+          style={{ textAlign: "center", fontSize: "16px" }}
+        >
+          Time Table for {selectedDate.toDateString()}
+        </Typography.Title>
+        <div style={{ textAlign: "center", marginBottom: "1rem" }}>
+          {weekdays.map((day, index) => (
+            <Button
+              key={day}
+              onClick={() => handleWeekdayChange(index)}
+              type={selectedDate.getDay() === index + 1 ? "primary" : "default"}
+              style={{
+                margin: "3px",
+                borderBottom:
+                  selectedDate.getDay() === index + 1
+                    ? `1px solid ${blue[5]}`
+                    : "none",
+                fontSize: "12px",
+              }}
+            >
+              {selectedDate.getDay() === index + 1 ? day.slice(0, 3) : day[0]}
+            </Button>
+          ))}
+        </div>
+        <Row justify="center">
+          <Col xs={24} sm={24} md={24} lg={24}>
+            {loading ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 9999,
+                  textAlign: "center",
+                  background: "rgba(255, 255, 255, 0.8)",
+                  padding: "20px",
+                  borderRadius: "8px",
+                }}
+              >
+                <Spin tip="Loading..." size="large" />
+              </div>
+            ) : (
+              <List itemLayout="vertical" style={{ width: "100%" }}>
+                {renderTimeTableList()}
+              </List>
+            )}
+          </Col>
+        </Row>
+      </Content>
+    </Layout>
   );
 };
 
