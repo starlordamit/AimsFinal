@@ -1,9 +1,9 @@
 // src/hooks/useAuth.js
 
 const useAuth = () => {
-  const token = sessionStorage.getItem("token");
-  const userDetails = sessionStorage.getItem("userDetails");
-  const data = sessionStorage.getItem("data");
+  const token = localStorage.getItem("token");
+  const userDetails = localStorage.getItem("userDetails");
+  const data = localStorage.getItem("data");
 
   return Boolean(token && userDetails && data);
 };

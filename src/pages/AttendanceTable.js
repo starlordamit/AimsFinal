@@ -1,3 +1,4 @@
+// src/pages/AttendanceTable.js
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -9,15 +10,23 @@ import {
   Progress,
   Layout,
   Spin,
+  notification,
+  Button,
+  Modal,
+  List,
 } from "antd";
 import { useMediaQuery } from "react-responsive";
 import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
   CheckCircleTwoTone,
   CloseCircleTwoTone,
   InfoCircleTwoTone,
   StopTwoTone,
 } from "@ant-design/icons";
 import ResponsiveNavBar from "../components/Navbar";
+import axios from "axios";
 
 const { Content } = Layout;
 
@@ -25,31 +34,94 @@ function AttendanceTable() {
   const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState([]);
   const [data, setData] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedLecture, setSelectedLecture] = useState(null);
+  const [lectureData, setLectureData] = useState([]);
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+  const stu_id = localStorage.getItem("userDetails").id;
 
   useEffect(() => {
-    const fetchData = () => {
-      const d = sessionStorage.getItem("data");
-      if (d) {
-        const parsedData = JSON.parse(d);
-        setData(parsedData);
-        const formattedData = parsedData.map((item, index) => ({
-          key: item.id || index,
-          course_name: item.cdata.course_name,
-          present: item.attendance_summary.Present,
-          absent: item.attendance_summary.Absent,
-          leave: item.attendance_summary.Leave,
-          exempt: item.attendance_summary.Exempt,
-          total: item.attendance_summary.Total,
-          percent: item.attendance_summary.Percent,
-        }));
-        setTableData(formattedData);
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        notification.error({ message: "No token found. Please log in." });
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        const response = await axios.get(
+          "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const result = response.data.response.data;
+        if (result && Array.isArray(result)) {
+          setData(result);
+          const formattedData = result.map((item, index) => ({
+            key: item.id || index,
+            course_name: item.cdata.course_name,
+            present: item.attendance_summary.Present,
+            absent: item.attendance_summary.Absent,
+            leave: item.attendance_summary.Leave,
+            exempt: item.attendance_summary.Exempt,
+            total: item.attendance_summary.Total,
+            percent: item.attendance_summary.Percent,
+            cf_id: item.id,
+            fk_student: item.student_id,
+          }));
+          setTableData(formattedData);
+        } else {
+          notification.error({
+            message: "Invalid data format received from server",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        notification.error({ message: "Failed to fetch data" });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, []);
+
+  const fetchLectureData = async (cf_id, fk_student) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      notification.error({ message: "No token found. Please log in." });
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://abes.platform.simplifii.com/api/v1/cards?type=Attendance&sort_by=+datetime1&equalto___fk_student=${fk_student}&equalto___cf_id=${cf_id}&token=${token}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const result = response.data.response.data;
+      if (result && Array.isArray(result)) {
+        const sortedData = result.reverse();
+        setLectureData(sortedData);
+        setModalVisible(true);
+      } else {
+        notification.error({
+          message: "Invalid data format received from server",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching lecture data:", error);
+      notification.error({ message: "Failed to fetch lecture data" });
+    }
+  };
+
+  const handleShowDetails = (id, stu) => {
+    setSelectedLecture(id);
+    fetchLectureData(id, stu);
+  };
 
   const columns = [
     {
@@ -93,12 +165,38 @@ function AttendanceTable() {
       key: "percent",
       align: "right",
       render: (percent) => (
-        <Tooltip title={`${percent}%`} placement="top" arrowPointAtCenter>
+        <Tooltip
+          title={`${percent}%`}
+          placement="top"
+          arrow={{ pointAtCenter: true }}
+        >
           <span>{percent}%</span>
         </Tooltip>
       ),
     },
+    {
+      title: "Actions",
+      key: "actions",
+
+      render: (text, record) => (
+        <Button
+          type="primary"
+          onClick={() => handleShowDetails(record.cf_id, record.fk_student)}
+        >
+          Show Details
+        </Button>
+      ),
+    },
   ];
+
+  const renderStatusIcon = (status) => {
+    if (status === "Present") {
+      return <CheckCircleTwoTone twoToneColor="#52c41a" />;
+    } else if (status === "Absent") {
+      return <CloseCircleTwoTone twoToneColor="#ff4d4f" />;
+    }
+    return null;
+  };
 
   if (loading) {
     return (
@@ -122,7 +220,7 @@ function AttendanceTable() {
     return (
       <Layout>
         <ResponsiveNavBar />
-        <Content style={{ padding: "24px", marginTop: "1px" }}>
+        <Content style={{ padding: "24px", marginTop: "16px" }}>
           <Typography.Title level={4} style={{ textAlign: "center" }}>
             No data available
           </Typography.Title>
@@ -134,19 +232,22 @@ function AttendanceTable() {
   return (
     <Layout>
       <ResponsiveNavBar />
-      <Content style={{ padding: "24px", marginTop: "1px" }}>
-        <Typography.Title level={4} style={{ textAlign: "center" }}>
+      <Content style={{ padding: "24px", marginTop: "16px" }}>
+        <Typography.Title
+          level={4}
+          style={{ textAlign: "center", marginBottom: "24px" }}
+        >
           Attendance Summary
         </Typography.Title>
         {isMobile ? (
           <Row gutter={[16, 16]}>
             {data.map((item) => (
               <Col xs={24} key={item.id}>
-                <Card style={{ marginBottom: "1px" }}>
-                  <Typography.Title level={5}>
+                <Card style={{ marginBottom: "16px", borderRadius: "8px" }}>
+                  <Typography.Title level={5} style={{ marginBottom: "8px" }}>
                     {item.cdata.course_name}
                   </Typography.Title>
-                  <Row align="middle">
+                  <Row align="middle" style={{ marginBottom: "8px" }}>
                     <Col span={2}>
                       <CheckCircleTwoTone twoToneColor="#52c41a" />
                     </Col>
@@ -156,7 +257,7 @@ function AttendanceTable() {
                       </Typography.Text>
                     </Col>
                   </Row>
-                  <Row align="middle">
+                  <Row align="middle" style={{ marginBottom: "8px" }}>
                     <Col span={2}>
                       <CloseCircleTwoTone twoToneColor="#ff4d4f" />
                     </Col>
@@ -166,7 +267,7 @@ function AttendanceTable() {
                       </Typography.Text>
                     </Col>
                   </Row>
-                  <Row align="middle">
+                  <Row align="middle" style={{ marginBottom: "8px" }}>
                     <Col span={2}>
                       <InfoCircleTwoTone twoToneColor="#1890ff" />
                     </Col>
@@ -176,7 +277,7 @@ function AttendanceTable() {
                       </Typography.Text>
                     </Col>
                   </Row>
-                  <Row align="middle">
+                  <Row align="middle" style={{ marginBottom: "8px" }}>
                     <Col span={2}>
                       <StopTwoTone twoToneColor="#595959" />
                     </Col>
@@ -186,7 +287,7 @@ function AttendanceTable() {
                       </Typography.Text>
                     </Col>
                   </Row>
-                  <Row align="middle">
+                  <Row align="middle" style={{ marginBottom: "8px" }}>
                     <Col span={24}>
                       <Typography.Text>
                         Total: {item.attendance_summary.Total}
@@ -196,7 +297,7 @@ function AttendanceTable() {
                   <Tooltip
                     title={`${item.attendance_summary.Percent}%`}
                     placement="top"
-                    arrow
+                    arrow={{ pointAtCenter: true }}
                   >
                     <Progress
                       percent={parseFloat(item.attendance_summary.Percent || 0)}
@@ -204,6 +305,13 @@ function AttendanceTable() {
                       style={{ marginTop: "8px" }}
                     />
                   </Tooltip>
+                  <Button
+                    type="primary"
+                    onClick={() => handleShowDetails(item.id, item.student_id)}
+                    style={{ marginTop: "8px", width: "100%" }}
+                  >
+                    Show Details
+                  </Button>
                 </Card>
               </Col>
             ))}
@@ -214,9 +322,45 @@ function AttendanceTable() {
             dataSource={tableData}
             pagination={false}
             bordered
+            style={{ borderRadius: "8px" }}
           />
         )}
       </Content>
+      <Modal
+        title="Lecture Details"
+        visible={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={null}
+        width={isMobile ? "100%" : 800}
+      >
+        <List
+          itemLayout="vertical"
+          dataSource={lectureData}
+          renderItem={(item) => (
+            <List.Item key={item.id}>
+              <Card>
+                <Typography.Title level={5}>
+                  <CalendarOutlined /> {item.date_formatted}
+                </Typography.Title>
+                <List.Item.Meta
+                  description={
+                    <>
+                      <Typography.Paragraph>
+                        <UserOutlined /> <strong>Faculty Name:</strong>{" "}
+                        {item.faculty_name}
+                      </Typography.Paragraph>
+                      <Typography.Paragraph>
+                        {renderStatusIcon(item.status)} <strong>Status:</strong>{" "}
+                        {item.status}
+                      </Typography.Paragraph>
+                    </>
+                  }
+                />
+              </Card>
+            </List.Item>
+          )}
+        />
+      </Modal>
     </Layout>
   );
 }

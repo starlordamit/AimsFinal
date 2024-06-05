@@ -11,6 +11,7 @@ import AttendancePieChart from "../components/AttendancePieChart";
 // import IndianClock from "../components/IndianClock";
 // import UserDialog from "../pages/UserDialog";
 // import { useState } from "react";
+import NoticeBoard from "../components/NoticeBoard";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ function Dashboard() {
   //     navigate("/login");
   //   }
   //   const [showTimeTable, setShowTimeTable] = useState(true);
-  //   const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
+  //   const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
 
   //   const [data, setData] = useState([]);
   //   const [open, setOpen] = useState(false);
@@ -33,13 +34,17 @@ function Dashboard() {
   //   const handleSwipe = () => {
   //     setIndex((index + 1) % texts.length);
   //   };
+  const notices =
+    "New feature: You can now view your attendance Lecture Wise & view your completed Quizes ... Menu > Attandance Details,  New user interface updates are live!";
+
+  const noticeArray = notices.split(",").map((notice) => notice.trim());
 
   useEffect(() => {
     const apiUrl =
       "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
 
     const fetchData = async () => {
-      const token = sessionStorage.getItem("token");
+      const token = localStorage.getItem("token");
       if (!token) {
         navigate("/login");
         return;
@@ -55,7 +60,7 @@ function Dashboard() {
         console.log("yes created");
 
         // setData(json.response.data); // Adjust according to actual API response structure
-        sessionStorage.setItem("data", JSON.stringify(json.response.data));
+        localStorage.setItem("data", JSON.stringify(json.response.data));
       } catch (error) {
         console.error("Failed to fetch data:", error);
         navigate("/login"); // Redirect to login on failure
@@ -96,8 +101,8 @@ function Dashboard() {
       <Container component="main" maxWidth="100%">
         <Box
           sx={{
-            mt: 4,
-            mb: 2,
+            mt: 1,
+            mb: 1,
             display: "flex",
             justifyContent: "space-between",
           }}
@@ -111,7 +116,9 @@ function Dashboard() {
             {showAttendance ? "Hide Attendance" : "Show Attendance"}
           </Button> */}
         </Box>
-
+        {noticeArray.map((notice, index) => (
+          <NoticeBoard key={index} notice={notice} />
+        ))}
         {/* <UserDialog
           open={open}
           handleClose={handleClose}

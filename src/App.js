@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CourseTable from "./components/CourseTable";
 import TodayLectures from "./components/TodayTimeTable";
 import { Analytics } from "@vercel/analytics/react";
+import CompletedQuizzes from "./pages/CompletedQuizzes";
 // import { useTheme } from "@mui/material/styles";
 // import { useMediaQuery } from "@mui/material";
 
@@ -68,6 +69,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AttendanceTable />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <ProtectedRoute>
+              <CompletedQuizzes />
             </ProtectedRoute>
           }
         />

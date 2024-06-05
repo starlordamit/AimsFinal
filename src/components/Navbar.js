@@ -11,6 +11,7 @@ import {
   message,
   Modal,
 } from "antd";
+import { useSpring, animated } from "react-spring";
 import {
   MenuOutlined,
   HomeOutlined,
@@ -22,11 +23,13 @@ import {
   ReloadOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
+  FileDoneOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import IndianClock from "./IndianClock";
 import UserDialog from "../pages/UserDialog";
+import AnimatedTitle from "../components/AnimatedTitle";
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -50,7 +53,7 @@ function ResponsiveNavBar() {
   });
 
   const navigate = useNavigate();
-  const userDetails = JSON.parse(sessionStorage.getItem("userDetails") || "{}");
+  const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
 
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
@@ -71,7 +74,7 @@ function ResponsiveNavBar() {
 
   const fetchTimeTableData = async (date) => {
     const dayOfMonth = new Date().getDate();
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
       return;
@@ -90,7 +93,7 @@ function ResponsiveNavBar() {
               "text/html"
             ).body.textContent,
           }));
-        sessionStorage.setItem("timeTableData", JSON.stringify(filteredData));
+        localStorage.setItem("timeTableData", JSON.stringify(filteredData));
         setSnackbarMessage("TIME TABLE DATA FETCHED");
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
@@ -101,7 +104,7 @@ function ResponsiveNavBar() {
   };
 
   const fetchAttendanceData = async () => {
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
       return;
@@ -114,7 +117,7 @@ function ResponsiveNavBar() {
         }),
       });
       const json = await response.json();
-      sessionStorage.setItem("data", JSON.stringify(json.response.data));
+      localStorage.setItem("data", JSON.stringify(json.response.data));
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -136,8 +139,8 @@ function ResponsiveNavBar() {
     }
   };
 
-  const token = sessionStorage.getItem("token");
-  const username = JSON.parse(sessionStorage.getItem("userDetails")).response
+  const token = localStorage.getItem("token");
+  const username = JSON.parse(localStorage.getItem("userDetails")).response
     .username;
 
   const handlePasswordChange = async () => {
@@ -192,7 +195,7 @@ function ResponsiveNavBar() {
   };
 
   const logout = () => {
-    sessionStorage.clear(); // Clear session storage
+    localStorage.clear(); // Clear session storage
     navigate("/login");
   };
 
@@ -211,8 +214,9 @@ function ResponsiveNavBar() {
           level={3}
           style={{ color: "white", flex: 1, margin: 0 }}
         >
-          AIMS 2.0
+          <AnimatedTitle />
         </Typography.Title>
+
         <IndianClock />
         <Button
           type="text"
@@ -240,6 +244,7 @@ function ResponsiveNavBar() {
           >
             Home
           </Menu.Item>
+
           <Menu.Item
             key="2"
             icon={<UserOutlined />}
@@ -247,28 +252,36 @@ function ResponsiveNavBar() {
           >
             Profile
           </Menu.Item>
+
           <Menu.Item
             key="3"
+            icon={<FileDoneOutlined />}
+            onClick={() => navigate("/quiz")}
+          >
+            Completed Quizzes
+          </Menu.Item>
+          <Menu.Item
+            key="4"
             icon={<BookOutlined />}
             onClick={() => navigate("/subjects")}
           >
             Subjects Details
           </Menu.Item>
           <Menu.Item
-            key="4"
+            key="5"
             icon={<CalendarOutlined />}
             onClick={() => navigate("/attendance")}
           >
             Attendance Details
           </Menu.Item>
           <Menu.Item
-            key="5"
+            key="6"
             icon={<KeyOutlined />}
             onClick={() => setDialogOpen(true)}
           >
             Change Password
           </Menu.Item>
-          <Menu.Item key="6" icon={<LogoutOutlined />} onClick={logout}>
+          <Menu.Item key="7" icon={<LogoutOutlined />} onClick={logout}>
             Log Out
           </Menu.Item>
         </Menu>

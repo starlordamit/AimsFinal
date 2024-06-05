@@ -7,7 +7,7 @@ function TodayLectures() {
   const formattedDate = format(today, "d"); // 'd' formats the date as day of the month
 
   useEffect(() => {
-    const allLectures = JSON.parse(sessionStorage.getItem("timeTableData")); // Ensure this data is correctly stored in sessionStorage
+    const allLectures = JSON.parse(localStorage.getItem("timeTableData")); // Ensure this data is correctly stored in localStorage
     const filteredLectures = allLectures.filter((lecture) => {
       const dayLecture = lecture[`c${formattedDate}`]; // Accessing dynamically based on the day of the month
       return dayLecture && dayLecture.trim() !== "";

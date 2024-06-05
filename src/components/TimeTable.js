@@ -25,7 +25,7 @@ const TimeTable = () => {
   const fetchTimeTableData = async (date) => {
     setLoading(true);
     const dayOfMonth = date.getDate();
-    const token = sessionStorage.getItem("token");
+    const token = localStorage.getItem("token");
     const url =
       "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
 

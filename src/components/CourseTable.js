@@ -7,7 +7,7 @@ import ResponsiveNavBar from "../components/Navbar";
 const { Content } = Layout;
 
 function CourseTable() {
-  const data1 = sessionStorage.getItem("data");
+  const data1 = localStorage.getItem("data");
   const data = JSON.parse(data1);
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
@@ -39,41 +39,43 @@ function CourseTable() {
   }));
 
   return (
-      <Layout>
-        <ResponsiveNavBar />
-        <Content style={{ padding: "24px", marginTop: "1px" }}>
-          <Typography.Title level={4} style={{ textAlign: "center" }}>
-            Course Details
-          </Typography.Title>
-          {isMobile ? (
-              <Row gutter={[16, 16]}>
-                {data.slice(0, data.length - 1).map((item, index) => (
-                    <Col xs={24} key={item.id || index}>
-                      <Card style={{ marginBottom: "1px" }}>
-                        <Typography.Title level={5}>
-                          {item.cdata.course_name}
-                        </Typography.Title>
-                        <Divider />
-                        <Typography.Paragraph>
-                          <UserOutlined /> <strong>Faculty Name:</strong> {item.faculty_name}
-                        </Typography.Paragraph>
-                        <Typography.Paragraph>
-                          <CodeOutlined /> <strong>Course Code:</strong> {item.cdata.course_code}
-                        </Typography.Paragraph>
-                      </Card>
-                    </Col>
-                ))}
-              </Row>
-          ) : (
-              <Table
-                  columns={columns}
-                  dataSource={tableData}
-                  pagination={false}
-                  bordered
-              />
-          )}
-        </Content>
-      </Layout>
+    <Layout>
+      <ResponsiveNavBar />
+      <Content style={{ padding: "24px", marginTop: "1px" }}>
+        <Typography.Title level={4} style={{ textAlign: "center" }}>
+          Course Details
+        </Typography.Title>
+        {isMobile ? (
+          <Row gutter={[16, 16]}>
+            {data.slice(0, data.length - 1).map((item, index) => (
+              <Col xs={24} key={item.id || index}>
+                <Card style={{ marginBottom: "1px" }}>
+                  <Typography.Title level={5}>
+                    {item.cdata.course_name}
+                  </Typography.Title>
+                  <Divider />
+                  <Typography.Paragraph>
+                    <UserOutlined /> <strong>Faculty Name:</strong>{" "}
+                    {item.faculty_name}
+                  </Typography.Paragraph>
+                  <Typography.Paragraph>
+                    <CodeOutlined /> <strong>Course Code:</strong>{" "}
+                    {item.cdata.course_code}
+                  </Typography.Paragraph>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={tableData}
+            pagination={false}
+            bordered
+          />
+        )}
+      </Content>
+    </Layout>
   );
 }
 
