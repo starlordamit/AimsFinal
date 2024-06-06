@@ -24,6 +24,7 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
   FileDoneOutlined,
+  ScheduleFilled,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -283,6 +284,17 @@ function ResponsiveNavBar() {
           </Menu.Item>
           <Menu.Item key="7" icon={<LogoutOutlined />} onClick={logout}>
             Log Out
+          </Menu.Item>
+          <br></br>
+          <br></br>
+          <br></br>
+          <br></br>
+          <Menu.Item
+            key="8"
+            icon={<ScheduleFilled />}
+            onClick={() => window.open("https://quiz.abesaims.site/")}
+          >
+            <strong>Start Quiz Here</strong>
           </Menu.Item>
         </Menu>
       </Drawer>
