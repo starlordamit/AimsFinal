@@ -35,7 +35,7 @@ function Dashboard() {
   //     setIndex((index + 1) % texts.length);
   //   };
   const notices =
-    "New feature: You can now view your attendance Lecture Wise & view your completed Quizes ... Menu > Attandance Details,  New user interface updates are live!";
+    "Good Luck For Your ST-2 !!! ,  Follow me On Instagram @i.am.amit.yadav 👀";
 
   const noticeArray = notices.split(",").map((notice) => notice.trim());
 
