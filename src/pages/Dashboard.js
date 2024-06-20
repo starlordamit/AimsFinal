@@ -35,7 +35,7 @@ function Dashboard() {
   //     setIndex((index + 1) % texts.length);
   //   };
   const notices =
-    "Good Luck For Your ST-2 !!! ,  Follow me On Instagram @i.am.amit.yadav 👀";
+    "Follow me On Instagram @i.am.amit.yadav 👀";
 
   const noticeArray = notices.split(",").map((notice) => notice.trim());
 
