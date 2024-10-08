@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "antd";
 import { motion } from "framer-motion";
-import { useHistory } from "react-router-dom"; // Assuming you are using react-router-dom for routing
+import { useNavigate } from "react-router-dom"; // Updated to use useNavigate from react-router-dom
 
 const titleVariants = {
   hidden: { opacity: 0, y: -20 },
@@ -11,11 +11,11 @@ const titleVariants = {
 };
 
 const AnimatedTitle = () => {
-  const history = useHistory();
+  const navigate = useNavigate(); // Updated to use useNavigate
 
   const handleClick = () => {
     // Redirect to home page
-    history.push("/");
+    navigate("/");
   };
 
   return (
