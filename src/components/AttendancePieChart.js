@@ -8,21 +8,33 @@ const { Title } = Typography;
 function AttendancePieChart() {
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
+  // Simulated data retrieval
   const aa = localStorage.getItem("data");
   const xx = JSON.parse(aa);
   const new1 = xx[xx.length - 1].attendance_summary;
 
+  // Function to calculate lectures needed to reach 75% attendance
   function calculateLecturesNeededFor75(present, total) {
-    const N = Math.max(0, Math.ceil((0.75 * total - present) / 0.25));
-    return N;
+    const requiredAttendance = 0.75;
+    if (present / total >= requiredAttendance) {
+      return 0;
+    }
+    const lecturesNeeded = Math.ceil(
+      (requiredAttendance * total - present) / (1 - requiredAttendance)
+    );
+    return lecturesNeeded;
   }
 
+  // Function to calculate lectures that can be missed while maintaining 75% attendance
   function calculateLecturesCanBeMissedFor75(present, total) {
-    const M = Math.max(
-      0,
-      Math.floor((present - 0.75 * total) / 0.75)
+    const requiredAttendance = 0.75;
+    if (present / total <= requiredAttendance) {
+      return 0;
+    }
+    const lecturesCanMiss = Math.floor(
+      (present - requiredAttendance * total) / requiredAttendance
     );
-    return M;
+    return lecturesCanMiss;
   }
 
   const lecturesNeededFor75 = calculateLecturesNeededFor75(
@@ -40,7 +52,7 @@ function AttendancePieChart() {
     { name: "Absent", value: new1.Total - new1.Present },
   ];
 
-  // Render customized label for the center of the pie chart
+  // Render customized label for the pie chart
   const renderCustomizedLabel = ({
     cx,
     cy,
@@ -69,13 +81,14 @@ function AttendancePieChart() {
     );
   };
 
+  // Define table columns
   const columns = [
     {
       title: "Description",
       dataIndex: "description",
       key: "description",
       render: (text, record) => (
-        <span style={{ color: record.color }}>{text}</span>
+        <span style={{ color: record.color, fontWeight: "bold" }}>{text}</span>
       ),
     },
     {
@@ -84,30 +97,50 @@ function AttendancePieChart() {
       key: "lectures",
       align: "center",
       render: (text, record) => (
-        <span style={{ color: record.color }}>{text}</span>
+        <span style={{ color: record.color, fontWeight: "bold" }}>{text}</span>
       ),
     },
   ];
 
-  const tableData = [];
+  // Prepare table data
+  const tableData = [
+    {
+      key: "1",
+      description: "Total Lectures",
+      lectures: new1.Total,
+      color: "black",
+    },
+    {
+      key: "2",
+      description: "Lectures Attended",
+      lectures: new1.Present,
+      color: "#a0d468", // Light green
+    },
+    {
+      key: "3",
+      description: "Lectures Absent",
+      lectures: new1.Total - new1.Present,
+      color: "#ff9f89", // Light red
+    },
+  ];
 
   if (lecturesNeededFor75 > 0) {
     tableData.push({
-      key: "1",
+      key: "4",
       description: "Lectures needed to reach 75% attendance",
       lectures: lecturesNeededFor75,
       color: "red",
     });
   } else if (lecturesCanBeMissedFor75 > 0) {
     tableData.push({
-      key: "2",
+      key: "5",
       description: "Lectures you can miss and still maintain 75% attendance",
       lectures: lecturesCanBeMissedFor75,
       color: "green",
     });
   } else {
     tableData.push({
-      key: "3",
+      key: "6",
       description: "Your attendance is exactly at 75%",
       lectures: "-",
       color: "black",
@@ -162,7 +195,6 @@ function AttendancePieChart() {
               dataSource={tableData}
               pagination={false}
               bordered
-              showHeader={false}
             />
           </Card>
         </Col>
