@@ -22,7 +22,7 @@ function AttendancePieChart() {
     const lecturesNeeded = Math.ceil(
       (requiredAttendance * total - present) / (1 - requiredAttendance)
     );
-    return lecturesNeeded;
+    return lecturesNeeded - present;
   }
 
   // Function to calculate lectures that can be missed while maintaining 75% attendance
