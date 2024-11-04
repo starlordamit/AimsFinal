@@ -1,6 +1,6 @@
 import React from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import { Typography, Row, Col } from "antd";
+import { Typography, Row, Col, Table, Card, Divider } from "antd";
 import { useMediaQuery } from "react-responsive";
 
 const { Title } = Typography;
@@ -13,13 +13,15 @@ function AttendancePieChart() {
   const new1 = xx[xx.length - 1].attendance_summary;
 
   function calculateLecturesNeededFor75(present, total) {
-    const N = Math.max(0, Math.ceil(3 * total - 4 * present));
+    const N = Math.max(0, Math.ceil((0.75 * total - present) / 0.25));
     return N;
   }
 
   function calculateLecturesCanBeMissedFor75(present, total) {
-    const numerator = 4 * present - 3 * total;
-    const M = Math.max(0, Math.floor(numerator / 3));
+    const M = Math.max(
+      0,
+      Math.floor((present - 0.75 * total) / 0.75)
+    );
     return M;
   }
 
@@ -67,6 +69,51 @@ function AttendancePieChart() {
     );
   };
 
+  const columns = [
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      render: (text, record) => (
+        <span style={{ color: record.color }}>{text}</span>
+      ),
+    },
+    {
+      title: "Lectures",
+      dataIndex: "lectures",
+      key: "lectures",
+      align: "center",
+      render: (text, record) => (
+        <span style={{ color: record.color }}>{text}</span>
+      ),
+    },
+  ];
+
+  const tableData = [];
+
+  if (lecturesNeededFor75 > 0) {
+    tableData.push({
+      key: "1",
+      description: "Lectures needed to reach 75% attendance",
+      lectures: lecturesNeededFor75,
+      color: "red",
+    });
+  } else if (lecturesCanBeMissedFor75 > 0) {
+    tableData.push({
+      key: "2",
+      description: "Lectures you can miss and still maintain 75% attendance",
+      lectures: lecturesCanBeMissedFor75,
+      color: "green",
+    });
+  } else {
+    tableData.push({
+      key: "3",
+      description: "Your attendance is exactly at 75%",
+      lectures: "-",
+      color: "black",
+    });
+  }
+
   return (
     <div>
       <Row justify="center" style={{ marginBottom: "16px" }}>
@@ -106,30 +153,18 @@ function AttendancePieChart() {
           </ResponsiveContainer>
         </Col>
       </Row>
-      <Row justify="center" style={{ marginTop: "16px" }}>
-        <Col>
-          {lecturesNeededFor75 > 0 ? (
-            <Title
-              level={4}
-              style={{ color: "red", textAlign: "center" }}
-            >
-              You need to attend {lecturesNeededFor75} more lecture
-              {lecturesNeededFor75 > 1 ? "s" : ""} to reach 75% attendance.
-            </Title>
-          ) : lecturesCanBeMissedFor75 > 0 ? (
-            <Title
-              level={4}
-              style={{ color: "green", textAlign: "center" }}
-            >
-              You can miss {lecturesCanBeMissedFor75} more lecture
-              {lecturesCanBeMissedFor75 > 1 ? "s" : ""} and still maintain
-              75% attendance.
-            </Title>
-          ) : (
-            <Title level={4} style={{ textAlign: "center" }}>
-              Your attendance is exactly at 75%.
-            </Title>
-          )}
+      <Divider />
+      <Row justify="center">
+        <Col xs={24} md={12}>
+          <Card>
+            <Table
+              columns={columns}
+              dataSource={tableData}
+              pagination={false}
+              bordered
+              showHeader={false}
+            />
+          </Card>
         </Col>
       </Row>
     </div>
