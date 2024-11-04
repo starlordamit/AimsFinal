@@ -34,8 +34,8 @@ function Dashboard() {
   //   const handleSwipe = () => {
   //     setIndex((index + 1) % texts.length);
   //   };
-  const notices =
-    "Follow me On Instagram @i.am.amit.yadav 👀";
+  const notices =[
+    "Follow me On Instagram @i.am.amit.yadav 👀","UPDATE !!! FIXED Leave Calculation for Maintain 75%"];
 
   const noticeArray = notices.split(",").map((notice) => notice.trim());
 
