@@ -12,25 +12,19 @@ function AttendancePieChart() {
   const xx = JSON.parse(aa);
   const new1 = xx[xx.length - 1].attendance_summary;
 
-  function calc75(present, total) {
-    const temp1 = present;
-    let temp = (present / total) * 100;
-    while (temp < 75) {
-      total++;
-      present++;
-      temp = (present / total) * 100;
-    }
-    return present - temp1;
+  function calculateLecturesNeededFor75(present, total) {
+    const N = Math.max(0, Math.ceil(3 * total - 4 * present));
+    return N;
   }
 
-  function leavefor75(present, total) {
-  const temp1 = present - 0.75 * total;
-  const temp = Math.floor(temp1 / 1.75);
-  return Math.max(0, temp);
-}
+  function calculateLecturesCanBeMissedFor75(present, total) {
+    const numerator = 4 * present - 3 * total;
+    const M = Math.max(0, Math.floor(numerator / 3));
+    return M;
+  }
 
-  const lectureneedfor75 = calc75(new1.Present, new1.Total);
-  const leactureleavefor75 = leavefor75(new1.Present, new1.Total);
+  const lecturesNeededFor75 = calculateLecturesNeededFor75(new1.Present, new1.Total);
+  const lecturesCanBeMissedFor75 = calculateLecturesCanBeMissedFor75(new1.Present, new1.Total);
 
   const COLORS = ["#a0d468", "#ff9f89"]; // Light green for Present, Light red for Absent
   const data = [
@@ -92,19 +86,19 @@ function AttendancePieChart() {
       key: "1",
       type: "Present",
       count: new1.Present,
-      for75: lectureneedfor75,
+      for75: lecturesNeededFor75,
     },
     {
       key: "2",
       type: "Absent",
       count: new1.Total - new1.Present,
-      for75: leactureleavefor75,
+      for75: lecturesCanBeMissedFor75,
     },
     {
       key: "3",
       type: "Total",
       count: new1.Total,
-      for75: leactureleavefor75 - lectureneedfor75,
+      for75: lecturesCanBeMissedFor75 - lecturesNeededFor75,
     },
   ];
 
