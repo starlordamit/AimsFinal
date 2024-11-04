@@ -1,7 +1,15 @@
 import React from "react";
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import { Typography, Row, Col, Table, Card, Divider } from "antd";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { Typography, Row, Col, Card, Table, List } from "antd";
 import { useMediaQuery } from "react-responsive";
+import "./AttendancePieChart.css"; // Import custom CSS styles
 
 const { Title } = Typography;
 
@@ -9,9 +17,10 @@ function AttendancePieChart() {
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
 
   // Simulated data retrieval
-  const aa = localStorage.getItem("data");
-  const xx = JSON.parse(aa);
-  const new1 = xx[xx.length - 1].attendance_summary;
+  const attendanceData = localStorage.getItem("data");
+  const attendanceJson = JSON.parse(attendanceData);
+  const attendanceSummary =
+    attendanceJson[attendanceJson.length - 1].attendance_summary;
 
   // Function to calculate lectures needed to reach 75% attendance
   function calculateLecturesNeededFor75(present, total) {
@@ -22,7 +31,7 @@ function AttendancePieChart() {
     const lecturesNeeded = Math.ceil(
       (requiredAttendance * total - present) / (1 - requiredAttendance)
     );
-    return lecturesNeeded - present;
+    return lecturesNeeded;
   }
 
   // Function to calculate lectures that can be missed while maintaining 75% attendance
@@ -38,48 +47,22 @@ function AttendancePieChart() {
   }
 
   const lecturesNeededFor75 = calculateLecturesNeededFor75(
-    new1.Present,
-    new1.Total
+    attendanceSummary.Present,
+    attendanceSummary.Total
   );
   const lecturesCanBeMissedFor75 = calculateLecturesCanBeMissedFor75(
-    new1.Present,
-    new1.Total
+    attendanceSummary.Present,
+    attendanceSummary.Total
   );
 
-  const COLORS = ["#a0d468", "#ff9f89"]; // Light green for Present, Light red for Absent
+  const COLORS = ["#00C49F", "#FF8042"]; // Updated color scheme
   const data = [
-    { name: "Present", value: new1.Present },
-    { name: "Absent", value: new1.Total - new1.Present },
+    { name: "Present", value: attendanceSummary.Present },
+    {
+      name: "Absent",
+      value: attendanceSummary.Total - attendanceSummary.Present,
+    },
   ];
-
-  // Render customized label for the pie chart
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    index,
-  }) => {
-    const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill="black"
-        textAnchor={x > cx ? "start" : "end"}
-        dominantBaseline="central"
-        fontSize={isMobile ? 12 : 14}
-      >
-        {`${data[index].name}: ${(percent * 100).toFixed(1)}%`}
-      </text>
-    );
-  };
 
   // Define table columns
   const columns = [
@@ -88,7 +71,7 @@ function AttendancePieChart() {
       dataIndex: "description",
       key: "description",
       render: (text, record) => (
-        <span style={{ color: record.color, fontWeight: "bold" }}>{text}</span>
+        <span style={{ color: record.color, fontWeight: 500 }}>{text}</span>
       ),
     },
     {
@@ -97,7 +80,7 @@ function AttendancePieChart() {
       key: "lectures",
       align: "center",
       render: (text, record) => (
-        <span style={{ color: record.color, fontWeight: "bold" }}>{text}</span>
+        <span style={{ color: record.color, fontWeight: 500 }}>{text}</span>
       ),
     },
   ];
@@ -107,20 +90,20 @@ function AttendancePieChart() {
     {
       key: "1",
       description: "Total Lectures",
-      lectures: new1.Total,
-      color: "black",
+      lectures: attendanceSummary.Total,
+      color: "#000",
     },
     {
       key: "2",
       description: "Lectures Attended",
-      lectures: new1.Present,
-      color: "#a0d468", // Light green
+      lectures: attendanceSummary.Present,
+      color: COLORS[0],
     },
     {
       key: "3",
       description: "Lectures Absent",
-      lectures: new1.Total - new1.Present,
-      color: "#ff9f89", // Light red
+      lectures: attendanceSummary.Total - attendanceSummary.Present,
+      color: COLORS[1],
     },
   ];
 
@@ -129,76 +112,111 @@ function AttendancePieChart() {
       key: "4",
       description: "Lectures needed to reach 75% attendance",
       lectures: lecturesNeededFor75,
-      color: "red",
+      color: "#FF4D4F", // Red color for warning
     });
   } else if (lecturesCanBeMissedFor75 > 0) {
     tableData.push({
       key: "5",
       description: "Lectures you can miss and still maintain 75% attendance",
       lectures: lecturesCanBeMissedFor75,
-      color: "green",
+      color: "#52C41A", // Green color for success
     });
   } else {
     tableData.push({
       key: "6",
       description: "Your attendance is exactly at 75%",
       lectures: "-",
-      color: "black",
+      color: "#FAAD14", // Yellow color for caution
     });
   }
 
+  // Notice Board Data (constant list)
+  const noticeData = [
+    {
+      key: "1",
+      // title: "Follow on Instagram",
+      description: "Follow me : @i.am.amit.yadav",
+    },
+    {
+      key: "2",
+      // title: "Update !",
+      description: "New UI, Fix Attandance calculation,",
+    },
+    // Add more notices as needed
+  ];
+
   return (
-    <div>
-      <Row justify="center" style={{ marginBottom: "16px" }}>
-        <Col>
-          <Title level={4} style={{ textAlign: "center", margin: 0 }}>
-            Attendance Summary
-          </Title>
-        </Col>
-      </Row>
-      <Row justify="center">
-        <Col xs={24} md={24}>
-          <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={isMobile ? 70 : 80}
-                outerRadius={isMobile ? 100 : 120}
-                labelLine={false}
-                label={renderCustomizedLabel}
-                fill="#8884d8"
-                dataKey="value"
-                animationBegin={0}
-                animationDuration={800}
-                animationEasing="ease-out"
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </Col>
-      </Row>
-      <Divider />
-      <Row justify="center">
-        <Col xs={24} md={12}>
-          <Card>
+    <div className="attendance-container">
+      {/* Attendance Summary Card */}
+      <Card className="attendance-card">
+        <Title level={3} className="attendance-title">
+          Attendance Summary
+        </Title>
+        <Row gutter={[24, 24]} justify="center" align="middle">
+          <Col xs={24} md={12}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  labelLine={false}
+                  label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend
+                  verticalAlign="bottom"
+                  align="center"
+                  iconType="circle"
+                  formatter={(value, entry) => (
+                    <span style={{ color: "#595959", fontWeight: 500 }}>
+                      {value}
+                    </span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </Col>
+          <Col xs={24} md={12}>
             <Table
               columns={columns}
               dataSource={tableData}
               pagination={false}
               bordered
+              className="attendance-table"
             />
-          </Card>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Notice Board Card */}
+      <Card className="notice-card">
+        <Title level={3} className="notice-title">
+          Notice Board
+        </Title>
+        <List
+          itemLayout="vertical"
+          dataSource={noticeData}
+          renderItem={(item) => (
+            <List.Item key={item.key}>
+              <List.Item.Meta
+                title={<a href="#">{item.title}</a>}
+                description={item.description}
+              />
+            </List.Item>
+          )}
+        />
+      </Card>
     </div>
   );
 }

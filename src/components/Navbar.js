@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Layout,
   Menu,
   Drawer,
   Button,
   Typography,
+  Tooltip,
+  Avatar,
+  Spin,
+  Modal,
+  message,
   Form,
   Input,
-  Alert,
-  message,
-  Modal,
 } from "antd";
-import { useSpring, animated } from "react-spring";
 import {
   MenuOutlined,
   HomeOutlined,
@@ -23,171 +24,103 @@ import {
   ReloadOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
-  FileDoneOutlined,
-  ScheduleFilled,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import IndianClock from "./IndianClock";
-import UserDialog from "../pages/UserDialog";
-import AnimatedTitle from "../components/AnimatedTitle";
+import UserDialog from "./UserDialog"; // Ensure this path is correct
+import "./ResponsiveNavBar.css"; // Ensure this path is correct
 
-const { Header, Content } = Layout;
-const { Text } = Typography;
+const { Header } = Layout;
+const { Title } = Typography;
 
 function ResponsiveNavBar() {
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-  });
+  const [userDetails, setUserDetails] = useState(null);
+  const [loadingData, setLoadingData] = useState(true); // Loading state for data fetching
+  const [changingPassword, setChangingPassword] = useState(false); // Loading state for password change
 
   const navigate = useNavigate();
-  const userDetails = JSON.parse(localStorage.getItem("userDetails") || "{}");
-
-  const handleSnackbarClose = () => {
-    setOpenSnackbar(false);
-  };
-
-  const handleChange = (prop) => (event) => {
-    setPasswords({ ...passwords, [prop]: event.target.value });
-  };
-
-  const togglePasswordVisibility = (field) => {
-    setShowPassword({ ...showPassword, [field]: !showPassword[field] });
-  };
-
-  const atUrl =
-    "https://abes.platform.simplifii.com/api/v1/custom/getCFMappedWithStudentID?embed_attendance_summary=1";
-  const ttUrl =
-    "https://abes.platform.simplifii.com/api/v1/custom/getMyScheduleStudent";
-
-  const fetchTimeTableData = async (date) => {
-    const dayOfMonth = new Date().getDate();
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    try {
-      const response = await axios.get(ttUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.data?.response?.data) {
-        const filteredData = response.data.response.data
-          .filter((row) => row[`c${dayOfMonth}`] && row.course_name)
-          .map((item) => ({
-            ...item,
-            timeText: new DOMParser().parseFromString(
-              item[`c${dayOfMonth}`],
-              "text/html"
-            ).body.textContent,
-          }));
-        localStorage.setItem("timeTableData", JSON.stringify(filteredData));
-        setSnackbarMessage("TIME TABLE DATA FETCHED");
-        setSnackbarSeverity("success");
-        setOpenSnackbar(true);
-      }
-    } catch (error) {
-      console.error("Failed to fetch time table:", error);
-    }
-  };
-
-  const fetchAttendanceData = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    try {
-      const response = await fetch(atUrl, {
-        headers: new Headers({
-          Authorization: `Bearer ${token}`,
-        }),
-      });
-      const json = await response.json();
-      localStorage.setItem("data", JSON.stringify(json.response.data));
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    }
-  };
-
-  const refreshPage = async () => {
-    try {
-      await fetchAttendanceData();
-      await fetchTimeTableData();
-      setSnackbarMessage("Data Refreshed Successfully!");
-      setSnackbarSeverity("success");
-      setOpenSnackbar(true);
-      window.location.reload();
-    } catch (error) {
-      console.error("Login error:", error);
-      setSnackbarMessage("Data Refresh Error", error);
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-    }
-  };
-
   const token = localStorage.getItem("token");
-  const username = JSON.parse(localStorage.getItem("userDetails")).response
-    .username;
+
+  // Fetch user details from API or localStorage
+  const fetchUserDetails = async () => {
+    const storedUserDetails = localStorage.getItem("userDetails");
+    if (storedUserDetails) {
+      setUserDetails(JSON.parse(storedUserDetails));
+      setLoadingData(false);
+    } else {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+      try {
+        const response = await axios.get(
+          "https://abes.platform.simplifii.com/api/v1/admin/getUserInfo",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserDetails(response.data);
+        localStorage.setItem("userDetails", JSON.stringify(response.data));
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+        message.error("Failed to fetch user details. Please log in again.");
+        navigate("/login");
+      } finally {
+        setLoadingData(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchUserDetails();
+  }, []);
 
   const handlePasswordChange = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
-      message.error("Passwords do not match.");
+      message.error("New passwords do not match.");
       return;
     }
-    const headers = {
-      Accept: "application/json, text/javascript, */*; q=0.01",
-      "Accept-Encoding": "gzip, deflate, br, zstd",
-      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-      Authorization: `Bearer ${token}`,
-      Connection: "keep-alive",
-      "Content-Type": "application/json",
-      Host: "abes.platform.simplifii.com",
-      Origin: "https://abes.web.simplifii.com",
-      Referer: "https://abes.web.simplifii.com/",
-      "Sec-Fetch-Dest": "empty",
-      "Sec-Fetch-Mode": "cors",
-      "Sec-Fetch-Site": "same-site",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-      "sec-ch-ua":
-        '"Google Chrome";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": '"macOS"',
-    };
-    const url = "https://abes.platform.simplifii.com/api/v1/cards";
-    const data = {
-      card_unique_code: username,
-      action: "ChangePassword",
-      current_password: passwords.currentPassword,
-      password: passwords.newPassword,
-    };
-
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    setChangingPassword(true);
     try {
-      const response = await axios.patch(url, data, { headers });
-      if (response.data) {
+      const response = await axios.patch(
+        "https://abes.platform.simplifii.com/api/v1/cards",
+        {
+          card_unique_code: userDetails.response.username,
+          action: "ChangePassword",
+          current_password: passwords.currentPassword,
+          password: passwords.newPassword,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.data.status === 1) {
         message.success("Password successfully changed!");
-        setDialogOpen(false);
+        setPasswordModalVisible(false);
+        setPasswords({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       } else {
-        message.error("Failed to change password. Please try again.");
+        message.error(response.data.msg || "Failed to change password.");
       }
     } catch (error) {
-      message.error(error.response.data.msg || "Failed to change password.");
-      console.error("Failed to change password:", error);
+      message.error(error.response?.data?.msg || "Failed to change password.");
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -196,169 +129,184 @@ function ResponsiveNavBar() {
   };
 
   const logout = () => {
-    localStorage.clear(); // Clear session storage
+    localStorage.clear();
     navigate("/login");
   };
 
-  return (
-    <Layout>
-      <Header
-        style={{ display: "flex", alignItems: "center", padding: "0 16px" }}
-      >
-        <Button
-          type="text"
-          icon={<MenuOutlined />}
-          onClick={toggleDrawer}
-          style={{ marginRight: "16px", color: "white" }}
-        />
-        <Typography.Title
-          level={3}
-          style={{ color: "white", flex: 1, margin: 0 }}
-        >
-          <AnimatedTitle />
-        </Typography.Title>
+  const menuItems = [
+    {
+      key: "1",
+      icon: <HomeOutlined />,
+      label: "Home",
+      onClick: () => {
+        navigate("/dashboard");
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "2",
+      icon: <UserOutlined />,
+      label: "Profile",
+      onClick: () => {
+        setUserDialogOpen(true);
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "3",
+      icon: <BookOutlined />,
+      label: "Subjects Details",
+      onClick: () => {
+        navigate("/subjects");
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "4",
+      icon: <CalendarOutlined />,
+      label: "Attendance Details",
+      onClick: () => {
+        navigate("/attendance");
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "5",
+      icon: <KeyOutlined />,
+      label: "Change Password",
+      onClick: () => {
+        setPasswordModalVisible(true);
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "6",
+      icon: <LogoutOutlined />,
+      label: "Log Out",
+      onClick: () => {
+        logout();
+        setDrawerOpen(false);
+      },
+    },
+  ];
 
-        <IndianClock />
-        <Button
-          type="text"
-          icon={<ReloadOutlined />}
-          onClick={refreshPage}
-          style={{ color: "white" }}
-        />
+  if (loadingData) {
+    return (
+      <div className="loading-container">
+        <Spin tip="Loading..." size="large" />
+      </div>
+    );
+  }
+
+  return (
+    <Layout className="layout">
+      <Header className="header">
+        <div className="left-section">
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={toggleDrawer}
+            className="menu-button"
+          />
+          <Title
+            level={4}
+            className="logo"
+            onClick={() => navigate("/dashboard")}
+          >
+            AIMS 2.0.
+          </Title>
+        </div>
+        <div className="right-section">
+          <Tooltip title="Refresh Data">
+            <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              onClick={fetchUserDetails}
+              className="icon-button"
+            />
+          </Tooltip>
+          <Avatar
+            style={{ backgroundColor: "#87d068", marginLeft: 16 }}
+            icon={<UserOutlined />}
+            onClick={() => setUserDialogOpen(true)}
+          />
+        </div>
       </Header>
+
       <Drawer
         title="Menu"
         placement="left"
         onClose={toggleDrawer}
         visible={drawerOpen}
         bodyStyle={{ padding: 0 }}
+        headerStyle={{ borderBottom: "none", borderRadius: "8px 8px 0 0" }}
       >
         <Menu
           mode="inline"
-          style={{ height: "100%", borderRight: 0 }}
-          onClick={toggleDrawer}
-        >
-          <Menu.Item
-            key="1"
-            icon={<HomeOutlined />}
-            onClick={() => navigate("/dashboard")}
-          >
-            Home
-          </Menu.Item>
-
-          <Menu.Item
-            key="2"
-            icon={<UserOutlined />}
-            onClick={() => setUserDialogOpen(true)}
-          >
-            Profile
-          </Menu.Item>
-
-          <Menu.Item
-            key="3"
-            icon={<FileDoneOutlined />}
-            onClick={() => navigate("/quiz")}
-          >
-            Completed Quizzes
-          </Menu.Item>
-          <Menu.Item
-            key="4"
-            icon={<BookOutlined />}
-            onClick={() => navigate("/subjects")}
-          >
-            Subjects Details
-          </Menu.Item>
-          <Menu.Item
-            key="5"
-            icon={<CalendarOutlined />}
-            onClick={() => navigate("/attendance")}
-          >
-            Attendance Details
-          </Menu.Item>
-          <Menu.Item
-            key="6"
-            icon={<KeyOutlined />}
-            onClick={() => setDialogOpen(true)}
-          >
-            Change Password
-          </Menu.Item>
-          <Menu.Item key="7" icon={<LogoutOutlined />} onClick={logout}>
-            Log Out
-          </Menu.Item>
-          <br></br>
-          <br></br>
-          <br></br>
-          <br></br>
-          <Menu.Item
-            key="8"
-            icon={<ScheduleFilled />}
-            onClick={() => window.open("https://quiz.abesaims.site/")}
-          >
-            <strong>Start Quiz Here</strong>
-          </Menu.Item>
-        </Menu>
+          style={{ height: "100%", borderRight: 0, borderRadius: "8px" }}
+          items={menuItems}
+        />
       </Drawer>
-      {/*<Content style={{ padding: '24px', marginTop: '64px' }}>*/}
-      {/*  /!* Main content goes here *!/*/}
-      {/*</Content>*/}
+
+      {/* User Profile Modal */}
       <UserDialog
         open={userDialogOpen}
         handleClose={() => setUserDialogOpen(false)}
-        userDetails={userDetails}
       />
+
+      {/* Change Password Modal */}
       <Modal
         title="Change Password"
-        visible={dialogOpen}
-        onCancel={() => setDialogOpen(false)}
-        footer={[
-          <Button key="back" onClick={() => setDialogOpen(false)}>
-            Cancel
-          </Button>,
-          <Button key="submit" type="primary" onClick={handlePasswordChange}>
-            Change Password
-          </Button>,
-        ]}
+        visible={passwordModalVisible}
+        onCancel={() => setPasswordModalVisible(false)}
+        onOk={handlePasswordChange}
+        confirmLoading={changingPassword}
+        okText="Change Password"
+        cancelButtonProps={{ style: { borderRadius: "8px" } }}
+        okButtonProps={{ style: { borderRadius: "8px" } }}
       >
         <Form layout="vertical">
-          <Form.Item label="Current Password">
+          <Form.Item label="Current Password" required>
             <Input.Password
               value={passwords.currentPassword}
-              onChange={handleChange("currentPassword")}
+              onChange={(e) =>
+                setPasswords({ ...passwords, currentPassword: e.target.value })
+              }
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
+              style={{ borderRadius: "8px" }}
             />
           </Form.Item>
-          <Form.Item label="New Password">
+          <Form.Item label="New Password" required>
             <Input.Password
               value={passwords.newPassword}
-              onChange={handleChange("newPassword")}
+              onChange={(e) =>
+                setPasswords({ ...passwords, newPassword: e.target.value })
+              }
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
+              style={{ borderRadius: "8px" }}
             />
           </Form.Item>
-          <Form.Item label="Confirm New Password">
+          <Form.Item label="Confirm New Password" required>
             <Input.Password
               value={passwords.confirmPassword}
-              onChange={handleChange("confirmPassword")}
+              onChange={(e) =>
+                setPasswords({
+                  ...passwords,
+                  confirmPassword: e.target.value,
+                })
+              }
               iconRender={(visible) =>
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
+              style={{ borderRadius: "8px" }}
             />
           </Form.Item>
         </Form>
       </Modal>
-      {openSnackbar && (
-        <Alert
-          message={snackbarMessage}
-          type={snackbarSeverity}
-          showIcon
-          closable
-          afterClose={handleSnackbarClose}
-          style={{ position: "fixed", bottom: 16, right: 16 }}
-        />
-      )}
     </Layout>
   );
 }

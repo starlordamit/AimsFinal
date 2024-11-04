@@ -1,0 +1,44 @@
+/* AttendancePieChart.css */
+
+.attendance-container {
+  /* padding: 24px; */
+}
+
+.attendance-card,
+.notice-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 14px;
+}
+
+.attendance-title,
+.notice-title {
+  text-align: center;
+  margin-bottom: 4px;
+  color: #262626;
+}
+
+.attendance-table .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+.attendance-table .ant-table-tbody > tr > td {
+  font-size: 14px;
+}
+
+.notice-card .ant-list-item-meta-title a {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.notice-card .ant-list-item {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+@media (max-width: 767px) {
+  .attendance-title,
+  .notice-title {
+    font-size: 24px;
+  }
+}

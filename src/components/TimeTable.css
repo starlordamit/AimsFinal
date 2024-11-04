@@ -1,0 +1,79 @@
+/* TimeTable.css */
+.layout {
+  height: "auto";
+  background-color: #ffffff; /* Changed background to white */
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.content {
+  max-width: 600px;
+  margin: auto;
+  padding: 24px;
+  background-color: #ffffff; /* Ensures content area is also white */
+  border-radius: 12px;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.stepper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.date-text {
+  margin: 0 16px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.timeline-item-content {
+  padding: 8px;
+  border-radius: 8px; /* Added rounded corners */
+  background-color: #f9f9f9; /* Light background for timeline items */
+}
+
+.current-class .ant-typography {
+  color: #ff4d4f; /* Updated to a standard red color */
+  font-weight: bold;
+}
+
+.current-class {
+  background-color: #fff1f0; /* Light red background for current class */
+  border-radius: 8px; /* Added rounded corners */
+}
+
+.timeline-item-content:hover {
+  background-color: #e6f7ff; /* Hover effect */
+  cursor: pointer;
+}
+
+.ant-timeline-item-head-blue {
+  background-color: #1890ff; /* Standard Ant Design blue */
+}
+
+.ant-timeline-item-head-red {
+  background-color: #ff4d4f; /* Standard Ant Design red */
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 16px;
+  }
+
+  .date-text {
+    font-size: 14px;
+  }
+}

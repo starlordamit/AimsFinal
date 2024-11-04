@@ -1,0 +1,164 @@
+/* ResponsiveNavBar.css */
+
+.layout {
+  /* min-height: 100vh; */
+}
+
+.header {
+  background-color: #ffffff; /* Set header background to white */
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+}
+
+.menu-button {
+  margin-top: 15px;
+  font-size: 24px;
+  color: #000000; /* Black color for icons */
+}
+
+.logo {
+  margin-left: 16px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000000; /* Black color for the logo text */
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.icon-button {
+  font-size: 24px;
+  color: #000000; /* Black color for icons */
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.ant-drawer-header {
+  background-color: #ffffff; /* White background for drawer header */
+}
+
+.ant-drawer-title {
+  color: #000000; /* Black color for drawer title */
+}
+
+.ant-drawer-body {
+  background-color: #ffffff; /* White background for drawer body */
+}
+
+.ant-menu {
+  background-color: #ffffff; /* White background for menu */
+}
+
+.ant-menu-item {
+  font-size: 16px;
+}
+
+.ant-menu-item-selected {
+  background-color: #f0f0f0 !important; /* Light gray when selected */
+}
+
+.ant-menu-item:hover {
+  background-color: #f0f0f0; /* Light gray on hover */
+}
+
+.ant-avatar {
+  cursor: pointer;
+}
+
+/* Modal Styles */
+.ant-modal-content {
+  border-radius: 12px;
+}
+
+.ant-modal-header {
+  background-color: #ffffff;
+  border-bottom: none;
+}
+
+.ant-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-modal-footer {
+  border-top: none;
+}
+
+.ant-btn-primary {
+  background-color: #007aff;
+  border-color: #007aff;
+  border-radius: 8px;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #0051a8;
+  border-color: #0051a8;
+}
+
+.ant-btn {
+  border-radius: 8px;
+}
+
+.ant-input {
+  border-radius: 8px;
+}
+
+.ant-input-password {
+  border-radius: 8px;
+}
+
+.ant-form-item-label > label {
+  color: #000000;
+}
+
+/* Adjust the menu item icon color */
+.ant-menu-item .anticon {
+  font-size: 18px;
+  color: #000000;
+}
+
+/* Adjust the menu item text color */
+.ant-menu-item .ant-menu-title-content {
+  color: #000000;
+}
+
+/* Drawer Styles */
+.ant-drawer {
+  border-radius: 0;
+}
+
+.ant-drawer-content {
+  background-color: #ffffff;
+}
+
+/* Tooltip Styles */
+.ant-tooltip-inner {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Spin Styles */
+.ant-spin-dot {
+  font-size: 32px;
+  color: #007aff;
+}
