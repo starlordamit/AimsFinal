@@ -24,15 +24,10 @@ function AttendancePieChart() {
   }
 
   function leavefor75(present, total) {
-    const temp1 = present;
-    let temp = (present / total) * 100;
-    while (temp > 75) {
-      total++;
-      present--;
-      temp = (present / total) * 100;
-    }
-    return temp1 - present;
-  }
+  const temp1 = present - 0.75 * total;
+  const temp = Math.floor(temp1 / 1.75);
+  return Math.max(0, temp);
+}
 
   const lectureneedfor75 = calc75(new1.Present, new1.Total);
   const leactureleavefor75 = leavefor75(new1.Present, new1.Total);
