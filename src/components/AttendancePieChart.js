@@ -14,7 +14,7 @@ function AttendancePieChart() {
 
   function calculateLecturesNeededFor75(present, total) {
     const N = Math.max(0, Math.ceil(3 * total - 4 * present));
-    return N;
+    return N - present;
   }
 
   function calculateLecturesCanBeMissedFor75(present, total) {
