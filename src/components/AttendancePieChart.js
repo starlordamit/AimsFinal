@@ -70,7 +70,7 @@ function AttendancePieChart() {
     targetAttendance
   );
 
-  const COLORS = ["#00C49F", "#FF8042"]; // Updated color scheme
+  const COLORS = ["#52c41a", "#f5222d"]; // Updated color scheme
   const data = [
     { name: "Present", value: attendanceSummary.Present },
     {

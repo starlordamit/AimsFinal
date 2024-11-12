@@ -15,6 +15,7 @@ import TodayLectures from "./components/TodayTimeTable";
 import { Analytics } from "@vercel/analytics/react";
 import CompletedQuizzes from "./pages/CompletedQuizzes";
 import AttemptQuiz from "./pages/QuizPage";
+import About from "./pages/About";
 // import { useTheme } from "@mui/material/styles";
 // import { useMediaQuery } from "@mui/material";
 
@@ -78,6 +79,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CompletedQuizzes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute>
+              <About />
             </ProtectedRoute>
           }
         />

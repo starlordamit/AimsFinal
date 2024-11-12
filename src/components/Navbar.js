@@ -26,6 +26,7 @@ import {
   EyeTwoTone,
   QuestionCircleOutlined,
   CarryOutOutlined,
+  SmileFilled,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -197,6 +198,15 @@ function ResponsiveNavBar() {
       label: "Change Password",
       onClick: () => {
         setPasswordModalVisible(true);
+        setDrawerOpen(false);
+      },
+    },
+    {
+      key: "9",
+      icon: <SmileFilled />,
+      label: "About/Dev",
+      onClick: () => {
+        navigate("/about");
         setDrawerOpen(false);
       },
     },
