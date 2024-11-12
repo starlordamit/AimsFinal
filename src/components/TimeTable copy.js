@@ -6,25 +6,20 @@ import {
   Button,
   Divider,
   Timeline,
+  Badge,
   Empty,
-  Tag,
 } from "antd";
 import {
   LeftOutlined,
   RightOutlined,
   ClockCircleOutlined,
-  CheckCircleOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import minMax from "dayjs/plugin/minMax";
-import customParseFormat from "dayjs/plugin/customParseFormat"; // Import customParseFormat plugin
 import "./TimeTable.css"; // Import custom CSS for styling
 
 dayjs.extend(isBetween);
-dayjs.extend(minMax);
-dayjs.extend(customParseFormat); // Extend dayjs with customParseFormat
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -60,28 +55,13 @@ function TimeTable() {
             const lectureInfo = row[`c${dayOfMonth}`];
             return lectureInfo && row.course_name && hasValidTime(lectureInfo);
           })
-          .map((item) => {
-            const rawText = stripHtml(item[`c${dayOfMonth}`]);
-            // Extract time slots
-            const timeSlots = extractTimeSlots(rawText);
-            // Convert time slots to 12-hour format
-            const formattedTimeSlots = timeSlots.map((slot) =>
-              convertTo12HourFormat(slot)
-            );
-            // Extract additional info (if any)
-            const additionalInfo = rawText
-              .replace(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g, "")
-              .trim();
-            return {
-              ...item,
-              timeSlots,
-              formattedTimeSlots,
-              additionalInfo,
-            };
-          })
+          .map((item) => ({
+            ...item,
+            timeText: stripHtml(item[`c${dayOfMonth}`]),
+          }))
           .sort((a, b) => {
-            const timeA = getTimeFromString(a.timeSlots[0]);
-            const timeB = getTimeFromString(b.timeSlots[0]);
+            const timeA = getTimeFromString(a.timeText);
+            const timeB = getTimeFromString(b.timeText);
             return timeA.localeCompare(timeB);
           });
         setTimeTableData(filteredData);
@@ -97,36 +77,17 @@ function TimeTable() {
 
   const stripHtml = (html) => {
     const doc = new DOMParser().parseFromString(html, "text/html");
-    const text = doc.body.textContent || "";
-    // Insert space between concatenated time slots
-    return text.replace(
-      /(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})(?=\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/g,
-      "$1 "
-    );
+    return doc.body.textContent || "";
   };
 
   const hasValidTime = (text) => {
-    // Check if text contains at least one valid time slot in HH:MM - HH:MM format
+    // Check if text contains a valid time slot in HH:MM - HH:MM format
     return /\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/.test(text);
   };
 
-  const extractTimeSlots = (text) => {
-    // Extract all time slots from the text
-    return text.match(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g) || [];
-  };
-
-  const convertTo12HourFormat = (timeRange) => {
-    const [startTime, endTime] = timeRange.split("-");
-    const startTimeFormatted = dayjs(startTime.trim(), "HH:mm").format(
-      "h:mm A"
-    );
-    const endTimeFormatted = dayjs(endTime.trim(), "HH:mm").format("h:mm A");
-    return `${startTimeFormatted} - ${endTimeFormatted}`;
-  };
-
-  const getTimeFromString = (timeRange) => {
-    const [startTime] = timeRange.split("-");
-    return startTime.trim();
+  const getTimeFromString = (text) => {
+    const match = text.match(/\d{2}:\d{2}/);
+    return match ? match[0] : "";
   };
 
   const handleDateChange = (direction) => {
@@ -138,19 +99,13 @@ function TimeTable() {
     setSelectedDate(newDate);
   };
 
-  const getClassStatus = (item) => {
+  const isCurrentClass = (timeString) => {
     const currentTime = dayjs();
 
-    const { timeSlots } = item;
-    if (!timeSlots || timeSlots.length === 0) {
-      return "unknown";
-    }
+    const timeSlots = timeString.match(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g);
+    if (!timeSlots) return false;
 
-    // Parse all start and end times
-    let startTimes = [];
-    let endTimes = [];
-
-    timeSlots.forEach((slot) => {
+    return timeSlots.some((slot) => {
       const [startTimeString, endTimeString] = slot.split("-");
       const startTime = dayjs(
         `${selectedDate.format("YYYY-MM-DD")} ${startTimeString.trim()}`,
@@ -160,79 +115,31 @@ function TimeTable() {
         `${selectedDate.format("YYYY-MM-DD")} ${endTimeString.trim()}`,
         "YYYY-MM-DD HH:mm"
       );
-      startTimes.push(startTime);
-      endTimes.push(endTime);
+      return currentTime.isBetween(startTime, endTime, null, "[)");
     });
-
-    const earliestStartTime = dayjs.min(startTimes);
-    const latestEndTime = dayjs.max(endTimes);
-
-    if (currentTime.isBefore(earliestStartTime)) {
-      return "upcoming";
-    } else if (currentTime.isAfter(latestEndTime)) {
-      return "completed";
-    } else {
-      return "ongoing";
-    }
   };
 
   const renderTimeTable = () => {
     return (
       <Timeline mode="left">
         {timeTableData.map((item, index) => {
-          const status = getClassStatus(item);
-
-          // Choose icon based on status
-          let icon;
-          if (status === "completed") {
-            icon = (
-              <CheckCircleOutlined
-                style={{ fontSize: "16px", color: "green" }}
-              />
-            );
-          } else if (status === "ongoing") {
-            icon = (
-              <ClockCircleOutlined style={{ fontSize: "16px", color: "red" }} />
-            );
-          } else {
-            icon = (
-              <ClockCircleOutlined
-                style={{ fontSize: "16px", color: "blue" }}
-              />
-            );
-          }
-
+          const isCurrent = isCurrentClass(item.timeText);
           return (
             <Timeline.Item
               key={index}
-              dot={icon}
-              color={
-                status === "ongoing"
-                  ? "red"
-                  : status === "completed"
-                  ? "green"
-                  : "blue"
-              }
+              dot={<ClockCircleOutlined style={{ fontSize: "16px" }} />}
+              color={isCurrent ? "red" : "blue"}
             >
-              <div className="timeline-item-content">
+              <div
+                className={`timeline-item-content ${
+                  isCurrent ? "current-class" : ""
+                }`}
+              >
                 <Text strong>{item.course_name.split("/")[2]}</Text>
                 <br />
                 <Text>{item.faculty_name}</Text>
                 <br />
-                {/* Display time slots as box-type tags in 12-hour format */}
-                <div className="time-slots">
-                  {item.formattedTimeSlots.map((slot, idx) => (
-                    <Tag color="blue" key={idx}>
-                      {slot}
-                    </Tag>
-                  ))}
-                </div>
-                {item.additionalInfo && (
-                  <>
-                    <br />
-                    <Text>{item.additionalInfo}</Text>
-                  </>
-                )}
+                <Text>{item.timeText}</Text>
               </div>
             </Timeline.Item>
           );

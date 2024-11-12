@@ -17,17 +17,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const { Content } = Layout;
-const extractLinkFromAnchorTag = (anchorTag) => {
-  // Create a temporary DOM element to parse the HTML string
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = anchorTag;
 
-  // Find the anchor tag within the temporary DOM element
-  const anchorElement = tempDiv.querySelector("a");
-
-  // Return the href attribute value
-  return anchorElement ? anchorElement.href : null;
-};
 function CompletedQuizzes() {
   const [loading, setLoading] = useState(true);
   const [tableData, setTableData] = useState([]);
@@ -100,30 +90,25 @@ function CompletedQuizzes() {
     },
     {
       title: "Quiz Link",
-      dataIndex: "quiz_link",
+      dataIndex: "quiz_uc",
       key: "quiz_link",
-      render: (quiz_link) => {
-        const linkMatch = quiz_link.match(/href="([^"]*)"/);
-        const href = linkMatch ? linkMatch[1] : "#";
-        return (
-          <Button
-            type="primary"
-            href={href}
-            target="_blank"
-            style={{ transition: "all 0.3s ease" }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "scale(1.05)";
-              e.target.style.backgroundColor = "#40a9ff";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.backgroundColor = "#1890ff";
-            }}
-          >
-            View Quiz
-          </Button>
-        );
-      },
+      render: (quiz_uc) => (
+        <Button
+          type="primary"
+          onClick={() => navigate(`/quiz1?req_id=${quiz_uc}`)}
+          style={{ transition: "all 0.3s ease" }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "scale(1.05)";
+            e.target.style.backgroundColor = "#40a9ff";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "scale(1)";
+            e.target.style.backgroundColor = "#1890ff";
+          }}
+        >
+          View Quiz
+        </Button>
+      ),
     },
     {
       title: "Marks Obtained",
@@ -245,9 +230,13 @@ function CompletedQuizzes() {
                     <Col span={24}>
                       <Button
                         type="primary"
-                        href={extractLinkFromAnchorTag(item.quiz_link)}
-                        target="_blank"
-                        style={{ width: "100%", transition: "all 0.3s ease" }}
+                        onClick={() =>
+                          navigate(`/quiz1?req_id=${item.quiz_uc}`)
+                        }
+                        style={{
+                          width: "100%",
+                          transition: "all 0.3s ease",
+                        }}
                         onMouseEnter={(e) => {
                           e.target.style.transform = "scale(1.05)";
                           e.target.style.backgroundColor = "#40a9ff";

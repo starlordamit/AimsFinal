@@ -163,15 +163,15 @@ function ResponsiveNavBar() {
         setDrawerOpen(false);
       },
     },
-    {
-      key: "7",
-      icon: <QuestionCircleOutlined />,
-      label: "QUIZ",
-      onClick: () => {
-        navigate("/quiz1");
-        setDrawerOpen(false);
-      },
-    },
+    // {
+    //   key: "7",
+    //   icon: <QuestionCircleOutlined />,
+    //   label: "QUIZ",
+    //   onClick: () => {
+    //     navigate("/quiz1");
+    //     setDrawerOpen(false);
+    //   },
+    // },
     {
       key: "8",
       icon: <CarryOutOutlined />,
@@ -219,7 +219,7 @@ function ResponsiveNavBar() {
   }
 
   return (
-    <Layout className="layout" style={{ backgroundColor: "#f4f4f4" }}>
+    <Layout className="layout">
       <Header className="header">
         <div className="left-section">
           <Button
@@ -259,20 +259,11 @@ function ResponsiveNavBar() {
         onClose={toggleDrawer}
         visible={drawerOpen}
         bodyStyle={{ padding: 0 }}
-        headerStyle={{
-          borderBottom: "none",
-          borderRadius: "8px 8px 0 0",
-          background: "#f4f4f4",
-        }}
+        headerStyle={{ borderBottom: "none", borderRadius: "8px 8px 0 0" }}
       >
         <Menu
           mode="inline"
-          style={{
-            height: "100%",
-            borderRight: 0,
-            borderRadius: "8px",
-            backgroundColor: "#f4f4f4",
-          }}
+          style={{ height: "100%", borderRight: 0, borderRadius: "8px" }}
           items={menuItems}
         />
       </Drawer>

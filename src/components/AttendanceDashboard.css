@@ -1,0 +1,30 @@
+.attendance-dashboard {
+  padding: 24px;
+  background-color: #f0f2f5;
+}
+
+.overview-card,
+.quiz-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.overview-card .ant-typography {
+  text-align: center;
+}
+
+.quiz-card {
+  padding: 16px;
+}
+
+@media (max-width: 767px) {
+  .attendance-dashboard {
+    padding: 16px;
+  }
+
+  .overview-card,
+  .quiz-card {
+    margin-bottom: 16px;
+  }
+}

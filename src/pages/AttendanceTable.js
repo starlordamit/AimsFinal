@@ -170,7 +170,7 @@ function AttendanceTable() {
           placement="top"
           arrow={{ pointAtCenter: true }}
         >
-          <span>{percent}%</span>
+          <span>{percent}</span>
         </Tooltip>
       ),
     },

@@ -215,3 +215,18 @@ body {
     padding: 40px 20px;
   }
 }
+.total-logins {
+  text-align: center;
+  font-size: 15px;
+  color: #1d1d1f;
+  /* margin-top: 20px; */
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .total-logins {
+    font-size: 15px;
+    /* margin-top: 16px; */
+  }
+}

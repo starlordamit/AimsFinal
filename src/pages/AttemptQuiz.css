@@ -1,0 +1,129 @@
+/* AttemptQuiz.css */
+
+/* Layout Styles */
+.attempt-quiz-layout {
+  min-height: 100vh;
+  background: #f5f5f5; /* Light grey background for the entire layout */
+}
+
+.attempt-quiz-content {
+  padding: 20px;
+}
+
+/* Quiz Header Styles */
+.quiz-header {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-bar {
+  width: 150px;
+  margin-right: 10px;
+}
+
+.countdown-timer {
+  font-size: 16px;
+  color: #ff4d4f; /* Red color for the countdown timer */
+}
+
+/* Question Card Styles */
+.question-card {
+  border-radius: 8px;
+  background: #ffffff; /* White background for question cards */
+  padding: 20px;
+}
+
+.question-text {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.options-group {
+  width: 100%;
+}
+
+/* Option Container Styles */
+.option-container {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #fafafa; /* Default light grey background */
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.option-container:hover {
+  background-color: #e6f7ff; /* Light blue background on hover */
+}
+
+/* Correct and Incorrect Option Styles */
+.correct-option {
+  background-color: #e6ffed; /* Light green background for correct options */
+}
+
+.incorrect-option {
+  background-color: #ffe6e6; /* Light red background for incorrect options */
+}
+
+/* Option Controls */
+.option-radio,
+.option-checkbox {
+  width: 100%;
+}
+
+.option-radio .ant-radio,
+.option-checkbox .ant-checkbox {
+  top: 0; /* Align the radio and checkbox vertically */
+}
+
+.option-radio span,
+.option-checkbox span {
+  display: block;
+  width: 100%;
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.navigation-buttons button {
+  width: 48%;
+}
+
+/* Summary Card Styles */
+.summary-card {
+  margin-top: 20px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 20px;
+}
+
+.summary-title {
+  text-align: center;
+  color: #1890ff; /* Primary blue color for the title */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .progress-bar {
+    width: 100px;
+  }
+
+  .navigation-buttons {
+    flex-direction: column;
+  }
+
+  .navigation-buttons button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .navigation-buttons button:last-child {
+    margin-bottom: 0;
+  }
+}

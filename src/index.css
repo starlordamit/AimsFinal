@@ -1,13 +1,74 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ResponsiveNavBar.css */
+
+.layout.light {
+  background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.layout.dark {
+  background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+}
+
+.header {
+  background-color: transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.left-section,
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.menu-button {
+  font-size: 24px;
+}
+
+.logo {
+  margin-left: 16px;
+  color: #000;
+  cursor: pointer;
+}
+
+.icon-button {
+  font-size: 20px;
+  color: #000;
+}
+
+/* Adjust text color based on theme */
+.layout.dark .logo,
+.layout.dark .icon-button {
+  color: #fff;
+}
+
+.avatar {
+  background-color: #87d068;
+  margin-left: 16px;
+  cursor: pointer;
+}
+
+/* Drawer and Menu Styles */
+.ant-drawer-body {
+  background-color: transparent;
+}
+
+.ant-menu {
+  border-right: 0;
+  border-radius: 8px;
+}
+
+.ant-menu-item {
+  border-radius: 8px !important;
+  margin: 8px !important;
+}
+
+/* Apply theme to menu */
+.layout.light .ant-menu {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.layout.dark .ant-menu {
+  background-color: rgba(0, 0, 0, 0.9);
 }

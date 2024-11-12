@@ -77,3 +77,53 @@
     font-size: 14px;
   }
 }
+/* General Content Styling */
+.content {
+  padding: 16px;
+}
+
+/* Header Styling */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+}
+
+.date-text {
+  margin: 0 8px;
+  font-size: 16px;
+}
+
+/* Loading Container */
+.loading-container {
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* Class Card Styling */
+.class-card {
+  display: flex;
+  align-items: flex-start;
+}
+
+.class-card.compact {
+  align-items: center;
+}
+
+.class-icon {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.class-info {
+  flex: 1;
+}
+
+.class-info .ant-typography {
+  margin-bottom: 4px;
+}

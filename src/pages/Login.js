@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Typography, Modal, notification } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Login.css"; // Ensure this path is correct
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import Box from "@mui/material/Box";
+import CountUp from "react-countup"; // Import CountUp for animation
 
 const { Title, Text } = Typography;
 
@@ -13,7 +16,27 @@ function Login() {
   const [buttonState, setButtonState] = useState("default");
   const [loading, setLoading] = useState(false);
   const [timeTableData, setTimeTableData] = useState([]);
+  const [totalLogin, setTotalLogin] = useState(0); // State variable for total logins
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTotalLogin = async () => {
+      try {
+        const response2 = await axios.get(
+          "https://x8ki-letl-twmt.n7.xano.io/api:uRfEYk4A/user"
+        );
+        if (response2.data.status === 1) {
+          setTotalLogin(response2.data.tlog);
+        } else {
+          setTotalLogin(0);
+        }
+      } catch (error) {
+        console.log(error.message);
+        setTotalLogin(0);
+      }
+    };
+    fetchTotalLogin();
+  }, []);
 
   const handleLogin = async (values) => {
     // Your existing login logic remains unchanged
@@ -90,7 +113,7 @@ function Login() {
         // Redirect to dashboard after a short delay
         setTimeout(() => {
           navigate("/dashboard");
-        }, 1000);
+        }, 10);
       } else {
         // Handle login failure
         notification.error({
@@ -160,14 +183,11 @@ function Login() {
         <div className="login-form-container">
           <div className="logo-container">
             <img
-              src="https://avatars.githubusercontent.com/u/48626910" // Your existing logo URL
+              src="https://avatars.githubusercontent.com/u/48626910"
               alt="Logo"
               className="logo-image"
             />
           </div>
-          {/* <Title level={2} className="login-title">
-            Welcome Back
-          </Title> */}
           <Text className="login-subtitle">
             Sign in to continue to your account
           </Text>
@@ -219,13 +239,45 @@ function Login() {
           >
             Forgot your password?
           </Button>
+
+          {/* Total Logins Display */}
+          <Typography variant="h6" component="div" className="total-logins">
+            Total Logins till now:{" "}
+            <CountUp
+              end={totalLogin}
+              duration={3}
+              separator=","
+              useEasing={true}
+            />
+          </Typography>
+
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ mt: 2 }}
+          >
+            <Typography
+              variant="h4"
+              component="span"
+              color="primary"
+              sx={{ fontWeight: "bold", mr: 1 }}
+            >
+              Made with
+            </Typography>
+            <FavoriteIcon color="error" fontSize="medium" />
+            <Typography
+              variant="h4"
+              component="span"
+              color="primary"
+              sx={{ fontWeight: "bold", ml: 1 }}
+            >
+              by <strong>Amit</strong>
+            </Typography>
+          </Box>
         </div>
         <div className="login-image-container">
-          {/* <img
-            src="https://abes.ac.in/home/banner/collegeimage.png" // Replace with the path to your college PNG image
-            alt="College"
-            className="login-image"
-          /> */}
+          {/* Your existing background image is set via CSS */}
         </div>
       </div>
 
