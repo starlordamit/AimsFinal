@@ -144,7 +144,7 @@ const AttemptQuiz = () => {
       setQuizSubmitted(true);
       await fetchQuizQuestions(credentials);
     } catch (error) {
-      message.error("Failed to submit quiz.");
+      message.error(error.message);
     }
   };
 

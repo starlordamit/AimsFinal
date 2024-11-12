@@ -223,6 +223,7 @@ function AttendancePieChart() {
 
       {/* Quiz Component */}
       <Card className="quiz-card">
+        BETA STAGE DONT DO QUIZ FROM HERE CHANCES OF NO SUBMISSION
         <Loginquiz />
       </Card>
     </div>
