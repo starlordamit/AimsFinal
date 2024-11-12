@@ -211,7 +211,6 @@ function AttendancePieChart() {
             max={99}
             value={targetAttendance}
             onChange={(value) => setTargetAttendance(value)}
-            tooltipVisible
             marks={{
               1: "1%",
               99: "99%",

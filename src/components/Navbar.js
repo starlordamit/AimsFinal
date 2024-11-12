@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UserDialog from "./UserDialog"; // Ensure this path is correct
 import "./ResponsiveNavBar.css"; // Ensure this path is correct
+import zIndex from "@mui/material/styles/zIndex";
 
 const { Header } = Layout;
 const { Title } = Typography;
@@ -281,6 +282,7 @@ function ResponsiveNavBar() {
       <UserDialog
         open={userDialogOpen}
         handleClose={() => setUserDialogOpen(false)}
+        style={{ zIndex: 999 }}
       />
 
       {/* Change Password Modal */}
