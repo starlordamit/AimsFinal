@@ -55,9 +55,9 @@ function Dashboard() {
             justifyContent: "space-between",
           }}
         ></Box>
-        {/* {noticeArray.map((notice, index) => (
+       {noticeArray.map((notice, index) => (
           <NoticeBoard key={index} notice={notice} />
-        ))} */}
+        ))}
 
         <Box sx={{ mt: 4, mb: 2 }}>
           <Grid container spacing={2}>
