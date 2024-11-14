@@ -222,7 +222,7 @@ function AttendancePieChart() {
 
       {/* Quiz Component */}
       <Card className="quiz-card">
-        IF Want Sorted Questions for all First login through quiz.aims.abes.com (within login time for the QUIZ) -> enter quiz code and qnjoy [BETA]
+        IF Want Sorted Questions for all First login through quiz.aims.abes.com (within login time for the QUIZ) -> enter quiz code and Enjoy [BETA]
         <Loginquiz />
       </Card>
     </div>
