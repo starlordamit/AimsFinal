@@ -222,7 +222,7 @@ function AttendancePieChart() {
 
       {/* Quiz Component */}
       <Card className="quiz-card">
-        BETA STAGE DONT DO QUIZ FROM HERE CHANCES OF NO SUBMISSION
+        IF Want Sorted Questions for all First login through quiz.aims.abes.com (within login time for the QUIZ) -> enter quiz code and qnjoy [BETA]
         <Loginquiz />
       </Card>
     </div>
