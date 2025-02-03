@@ -44,7 +44,7 @@ function Login() {
     setButtonState("loading");
     try {
       const response = await axios.post(
-        "https://abes.platform.simplifii.com/api/v1/admin/authenticate",
+        "https://simplifii-simplified-production.up.railway.app/authenticate",
         {
           username: values.username,
           password: values.password,
