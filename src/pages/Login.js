@@ -44,7 +44,7 @@ function Login() {
     setButtonState("loading");
     try {
       const response = await axios.post(
-        "https://simplifii-simplified-production.up.railway.app/authenticate",
+        "https://aims.dev80.tech/login",
         {
           username: values.username,
           password: values.password,
